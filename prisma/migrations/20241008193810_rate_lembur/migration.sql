@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE "rate_lembur" ADD COLUMN     "jam_lembur" INTEGER NOT NULL DEFAULT 0,
+ALTER COLUMN "rate_upah" SET DEFAULT 0,
+ALTER COLUMN "tahun" SET DEFAULT 0;

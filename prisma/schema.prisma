@@ -1,0 +1,726 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+model user {
+    id_user       String   @id @default(cuid()) @db.VarChar(255)
+    username      String   @unique @db.VarChar(255)
+    password      String   @db.VarChar(255)
+    name          String   @db.VarChar(255)
+    email         String   @unique @db.VarChar(255)
+    image         String?  @db.VarChar(255)
+    role          UserRole @default(user)
+    refresh_token String?  @db.Text
+
+    createdAt       DateTime          @default(now())
+    updatedAt       DateTime          @updatedAt
+    permohonan_izin permohonan_izin[]
+    pegawai         pegawai[]
+    pembayaran_gaji pembayaran_gaji[]
+}
+
+enum UserRole {
+    admin
+    super_admin
+    user
+}
+
+model jabatan {
+    id_jabatan String @id @default(cuid()) @db.VarChar(255)
+    nama       String @db.VarChar(255)
+    gaji       Int    @db.Integer
+
+    createdAt                   DateTime                      @default(now())
+    updatedAt                   DateTime                      @updatedAt
+    pegawai                     pegawai[]
+    slip_gaji_detail_gaji_pokok slip_gaji_detail_gaji_pokok[]
+}
+
+model jabatan_fungsional {
+    id_jabatan_fungsional String @id @default(cuid()) @db.VarChar(255)
+    nama                  String @db.VarChar(255)
+    tunjangan             Int    @db.Integer
+
+    createdAt                   DateTime                      @default(now())
+    updatedAt                   DateTime                      @updatedAt
+    slip_gaji_detail_fungsional slip_gaji_detail_fungsional[]
+    pegawai                     PegawaiJabatanFungsional[]
+}
+
+model status_kepegawaian {
+    id_status_kepegawaian String @id @default(cuid()) @db.VarChar(255)
+    nama                  String @db.VarChar(255)
+
+    createdAt DateTime  @default(now())
+    updatedAt DateTime  @updatedAt
+    pegawai   pegawai[]
+}
+
+model pegawai {
+    id_pegawai            String        @id @default(cuid()) @db.VarChar(255)
+    nama                  String        @db.VarChar(255)
+    email                 String        @unique @db.VarChar(255)
+    nomor_hp              String        @unique @db.VarChar(255)
+    foto                  String?       @db.VarChar(255)
+    nik                   String        @unique @db.VarChar(255)
+    nip                   String?       @unique @db.VarChar(255)
+    tempat_lahir          String        @db.VarChar(255)
+    tanggal_lahir         DateTime      @db.Date
+    tanggal_masuk         DateTime      @db.Date
+    tanggal_pensiun       DateTime      @db.Date
+    gender                Gender
+    agama                 Agama
+    alamat                String        @db.VarChar(255)
+    tenaga                TenagaRole    @default(pendidik)
+    jabatan_id            String        @db.VarChar(255)
+    // relasi ke jabatan fungsional
+    status_kepegawaian_id String        @db.VarChar(255)
+    riwayat_pendidikan    String[]      @db.VarChar(255)
+    status_pernikahan     String        @db.VarChar(255)
+    jumlah_istri          Int           @db.Integer
+    jumlah_anak           Int           @db.Integer
+    nomor_rekening        String?       @unique @db.VarChar(255)
+    status_pegawai        StatusPegawai
+    user_id               String        @db.VarChar(255)
+    lokasi_id             String        @db.VarChar(255)
+
+    jabatan            jabatan            @relation(fields: [jabatan_id], references: [id_jabatan], onDelete: Cascade)
+    status_kepegawaian status_kepegawaian @relation(fields: [status_kepegawaian_id], references: [id_status_kepegawaian], onDelete: Cascade)
+    user               user               @relation(fields: [user_id], references: [id_user], onDelete: Cascade)
+    data_lokasi        data_lokasi        @relation(fields: [lokasi_id], references: [id_lokasi], onDelete: Cascade)
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    tunjangan_bonus         tunjangan_bonus[]
+    pinjaman                pinjaman[]
+    potong_gaji             potong_gaji[]
+    tunjangan_hari_raya     tunjangan_hari_raya[]
+    absensi                 absensi[]
+    tunjangan_tetap_pegawai tunjangan_tetap_pegawai[]
+    jadwal_pegawai          jadwal_pegawai[]
+    identitas_sekolah       identitas_sekolah[]
+    jabatanFungsional       PegawaiJabatanFungsional[]
+    permohonan_izin         permohonan_izin[]
+    lembur                  lembur[]
+    slip_gaji               slip_gaji[]
+}
+
+model PegawaiJabatanFungsional {
+    pegawai_id            String             @db.VarChar(255)
+    jabatan_fungsional_id String             @db.VarChar(255)
+    pegawai               pegawai            @relation(fields: [pegawai_id], references: [id_pegawai])
+    jabatanFungsional     jabatan_fungsional @relation(fields: [jabatan_fungsional_id], references: [id_jabatan_fungsional])
+
+    @@id([pegawai_id, jabatan_fungsional_id]) // Membuat composite primary key
+}
+
+enum Agama {
+    islam
+    kristen
+    katolik
+    hindu
+    buddha
+    konghucu
+}
+
+enum StatusPegawai {
+    aktif
+    pindah
+    keluar
+    meninggal
+    pensiun
+}
+
+enum Gender {
+    laki_laki
+    perempuan
+}
+
+enum TenagaRole {
+    pendidik
+    kependidikan
+}
+
+model tunjangan_tetap {
+    id_tunjangan_tetap String @id @default(cuid()) @db.VarChar(255)
+    nama               String @db.VarChar(255)
+    nominal            Int    @db.Integer
+
+    createdAt               DateTime                  @default(now())
+    updatedAt               DateTime                  @updatedAt
+    tunjangan_tetap_pegawai tunjangan_tetap_pegawai[]
+    slip_gaji_detail_tetap  slip_gaji_detail_tetap[]
+}
+
+model tunjangan_tetap_pegawai {
+    id_tunjangan_tetap_pegawai String @id @default(cuid()) @db.VarChar(255)
+    pegawai_id                 String @db.VarChar(255)
+    tunjangan_tetap_id         String @db.VarChar(255)
+    jumlah                     Int    @db.Integer
+
+    pegawai         pegawai         @relation(fields: [pegawai_id], references: [id_pegawai], onDelete: Cascade)
+    tunjangan_tetap tunjangan_tetap @relation(fields: [tunjangan_tetap_id], references: [id_tunjangan_tetap], onDelete: Cascade)
+
+    createdAt              DateTime                 @default(now())
+    updatedAt              DateTime                 @updatedAt
+    slip_gaji_detail_tetap slip_gaji_detail_tetap[]
+}
+
+// tunjangan_hadir
+model tunjangan_kehadiran {
+    id_tunjangan_kehadiran String @id @default(cuid()) @db.VarChar(255)
+    nominal                Int    @db.Integer
+    tahun                  Int    @db.Integer
+
+    createdAt                  DateTime                     @default(now())
+    updatedAt                  DateTime                     @updatedAt
+    slip_gaji_detail_kehadiran slip_gaji_detail_kehadiran[]
+}
+
+model tunjangan_bonus {
+    id_tunjangan_bonus String   @id @default(cuid()) @db.VarChar(255)
+    pegawai_id         String   @db.VarChar(255)
+    tanggal            DateTime @db.Date
+    nominal            Int      @db.Integer
+    keterangan         String   @db.VarChar(255)
+
+    pegawai pegawai @relation(fields: [pegawai_id], references: [id_pegawai], onDelete: Cascade)
+
+    createdAt              DateTime                 @default(now())
+    updatedAt              DateTime                 @updatedAt
+    slip_gaji_detail_bonus slip_gaji_detail_bonus[]
+}
+
+model lembur {
+    id_lembur     String       @id @default(cuid()) @db.VarChar(255)
+    tanggal       DateTime     @db.Date
+    absensi_id    String       @db.VarChar(255)
+    pegawai_id    String       @db.VarChar(255)
+    jumlah_upah   Int          @db.Integer
+    total_upah    Int          @db.Integer
+    total_jam     Int          @db.Integer
+    rincian       String       @db.VarChar(255)
+    status_lembur StatusTerima
+
+    absensi absensi @relation(fields: [absensi_id], references: [id_absen])
+    pegawai pegawai @relation(fields: [pegawai_id], references: [id_pegawai])
+
+    createdAt               DateTime                  @default(now())
+    updatedAt               DateTime                  @updatedAt
+    slip_gaji_detail_lembur slip_gaji_detail_lembur[]
+}
+
+enum StatusTerima {
+    pending
+    proses
+    diterima
+    ditolak
+}
+
+model pinjaman {
+    id_pinjaman     String        @id @default(cuid()) @db.VarChar(255)
+    pegawai_id      String        @db.VarChar(255)
+    nominal         Int           @db.Integer
+    tanggal         DateTime      @db.Date
+    tahun           Int           @db.Integer
+    keterangan      String        @db.VarChar(255)
+    status_pinjaman StatusTerima?
+
+    pegawai pegawai @relation(fields: [pegawai_id], references: [id_pegawai], onDelete: Cascade)
+
+    createdAt                 DateTime                    @default(now())
+    updatedAt                 DateTime                    @updatedAt
+    slip_gaji_detail_pinjaman slip_gaji_detail_pinjaman[]
+}
+
+model pajak {
+    id_pajak String @id @default(cuid())
+    nama     String @db.VarChar(255)
+    persen   Float  @db.Real
+
+    createdAt              DateTime                 @default(now())
+    updatedAt              DateTime                 @updatedAt
+    slip_gaji_detail_pajak slip_gaji_detail_pajak[]
+}
+
+model potong_gaji {
+    id_potong_gaji String   @id @default(cuid()) @db.VarChar(255)
+    pegawai_id     String   @db.VarChar(255)
+    nominal        Int      @db.Integer
+    tanggal        DateTime @db.Date
+    tahun          Int      @db.Integer
+    keterangan     String   @db.VarChar(255)
+
+    pegawai pegawai @relation(fields: [pegawai_id], references: [id_pegawai], onDelete: Cascade)
+
+    createdAt                   DateTime                       @default(now())
+    updatedAt                   DateTime                       @updatedAt
+    slip_gaji_detai_potong_gaji slip_gaji_detail_potong_gaji[]
+}
+
+model tunjangan_hari_raya {
+    id_thr             String    @id @default(cuid()) @db.VarChar(255)
+    pegawai_id         String    @db.VarChar(255)
+    nominal            Int       @db.Integer
+    tahun              Int       @db.Integer
+    tanggal_pembayaran DateTime? @db.Date
+    metode_pembayaran  String    @db.VarChar(255)
+
+    pegawai pegawai @relation(fields: [pegawai_id], references: [id_pegawai], onDelete: Cascade)
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+model setting_gaji {
+    id_setting_gaji        String   @id @default(cuid()) @db.VarChar(255)
+    gaji_pokok             Boolean? @db.Boolean
+    tunjangan_tetap        Boolean? @db.Boolean
+    tunjangan_fungsional   Boolean? @db.Boolean
+    tunjangan_bonus        Boolean? @db.Boolean
+    tunjangan_lembur       Boolean? @db.Boolean
+    pinjaman               Boolean? @db.Boolean
+    potong_gaji            Boolean? @db.Boolean
+    tunjangan_kehadiran_id String   @db.VarChar(255)
+    pajak_id               String[] @db.VarChar(255)
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+// pembayaran di genarate
+model slip_gaji {
+    id_slip_gaji         String          @id @default(cuid()) @db.VarChar(255)
+    pegawai_id           String          @db.VarChar(255)
+    // dari jabatan 
+    gaji_pokok           Int             @default(0) @db.Integer
+    tunjangan_tetap      Int             @default(0) @db.Integer
+    tunjangan_kehadiran  Int             @default(0) @db.Integer
+    tunjangan_fungsional Int             @default(0) @db.Integer
+    tunjangan_bonus      Int             @default(0) @db.Integer
+    tunjangan_lembur     Int             @default(0) @db.Integer
+    pajak                Int             @default(0) @db.Integer
+    pinjaman             Int             @default(0) @db.Integer
+    potong_gaji          Int             @default(0) @db.Integer
+    total_gaji_kotor     Int             @default(0) @db.Integer
+    total_gaji_bersih    Int             @default(0) @db.Integer
+    tanggal              DateTime        @db.Date
+    status_pembayaran    StatusPmbayaran @default(pending)
+    bulan                Int             @db.Integer
+    tahun                Int             @db.Integer
+
+    pegawai pegawai @relation(fields: [pegawai_id], references: [id_pegawai])
+
+    createdAt                   DateTime                       @default(now())
+    updatedAt                   DateTime                       @updatedAt
+    pembayaran_gaji             pembayaran_gaji[]
+    slip_gaji_detai_pajak       slip_gaji_detail_pajak[]
+    slip_gaji_detai_potong_gaji slip_gaji_detail_potong_gaji[]
+    slip_gaji_detail_pinjaman   slip_gaji_detail_pinjaman[]
+    slip_gaji_detail_kehadiran  slip_gaji_detail_kehadiran[]
+    slip_gaji_detail_lembur     slip_gaji_detail_lembur[]
+    slip_gaji_detail_bonus      slip_gaji_detail_bonus[]
+    slip_gaji_detail_fungsional slip_gaji_detail_fungsional[]
+    slip_gaji_detail_gaji_pokok slip_gaji_detail_gaji_pokok[]
+    slip_gaji_detail_tetap      slip_gaji_detail_tetap[]
+}
+
+enum StatusPmbayaran {
+    pending
+    proses
+    dibayar
+}
+
+model slip_gaji_detail_tetap {
+    id_slip_gaji_detail_tetap  String   @id @default(cuid()) @db.VarChar(255)
+    slip_gaji_id               String   @db.VarChar(255)
+    tunjangan_tetap_id         String   @db.VarChar(255)
+    tunjangan_tetap_pegawai_id String   @db.VarChar(255)
+    total_tetap                Int      @db.Integer
+    tanggal                    DateTime @db.Date
+    bulan                      Int      @db.Integer
+    tahun                      Int      @db.Integer
+
+    slip_gaji               slip_gaji               @relation(fields: [slip_gaji_id], references: [id_slip_gaji], onDelete: Cascade)
+    tunjangan_tetap         tunjangan_tetap         @relation(fields: [tunjangan_tetap_id], references: [id_tunjangan_tetap], onDelete: Cascade)
+    tunjangan_tetap_pegawai tunjangan_tetap_pegawai @relation(fields: [tunjangan_tetap_pegawai_id], references: [id_tunjangan_tetap_pegawai], onDelete: Cascade)
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+model slip_gaji_detail_pajak {
+    id_slip_gaji_detail_pajak String   @id @default(cuid()) @db.VarChar(255)
+    slip_gaji_id              String   @db.VarChar(255)
+    pajak_id                  String   @db.VarChar(255)
+    total_pajak_persen        Float    @db.Real
+    total_pajak_rupiah        Int      @db.Integer
+    tanggal                   DateTime @db.Date
+    bulan                     Int      @db.Integer
+    tahun                     Int      @db.Integer
+
+    slip_gaji slip_gaji @relation(fields: [slip_gaji_id], references: [id_slip_gaji], onDelete: Cascade)
+    pajak     pajak     @relation(fields: [pajak_id], references: [id_pajak], onDelete: Cascade)
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+model slip_gaji_detail_potong_gaji {
+    id_slip_gaji_detail_potong_gaji String   @id @default(cuid()) @db.VarChar(255)
+    slip_gaji_id                    String   @db.VarChar(255)
+    potong_gaji_id                  String   @db.VarChar(255)
+    total_potong_gaji               Int      @db.Integer
+    tanggal                         DateTime @db.Date
+    bulan                           Int      @db.Integer
+    tahun                           Int      @db.Integer
+
+    slip_gaji   slip_gaji   @relation(fields: [slip_gaji_id], references: [id_slip_gaji], onDelete: Cascade)
+    potong_gaji potong_gaji @relation(fields: [potong_gaji_id], references: [id_potong_gaji], onDelete: Cascade)
+
+    createdAt     DateTime @default(now())
+    updatedAt     DateTime @updatedAt
+    pajakId_pajak String?
+}
+
+model slip_gaji_detail_pinjaman {
+    id_slip_gaji_detail_pinjaman String   @id @default(cuid()) @db.VarChar(255)
+    slip_gaji_id                 String   @db.VarChar(255)
+    pinjaman_id                  String   @db.VarChar(255)
+    total_pinjaman               Int      @db.Integer
+    tanggal                      DateTime @db.Date
+    bulan                        Int      @db.Integer
+    tahun                        Int      @db.Integer
+
+    slip_gaji slip_gaji @relation(fields: [slip_gaji_id], references: [id_slip_gaji], onDelete: Cascade)
+    pinjaman  pinjaman  @relation(fields: [pinjaman_id], references: [id_pinjaman], onDelete: Cascade)
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+model slip_gaji_detail_kehadiran {
+    id_slip_gaji_detail_kehadiran String   @id @default(cuid()) @db.VarChar(255)
+    slip_gaji_id                  String   @db.VarChar(255)
+    tunjangan_kehadiran_id        String   @db.VarChar(255)
+    total_kehadiran               Int      @db.Integer
+    upah_per_hadir                Int      @db.Integer
+    total                         Int      @db.Integer
+    tanggal                       DateTime @db.Date
+    bulan                         Int      @db.Integer
+    tahun                         Int      @db.Integer
+
+    slip_gaji           slip_gaji           @relation(fields: [slip_gaji_id], references: [id_slip_gaji], onDelete: Cascade)
+    tunjangan_kehadiran tunjangan_kehadiran @relation(fields: [tunjangan_kehadiran_id], references: [id_tunjangan_kehadiran], onDelete: Cascade)
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+model slip_gaji_detail_lembur {
+    id_slip_gaji_detail_lembur String   @id @default(cuid()) @db.VarChar(255)
+    slip_gaji_id               String   @db.VarChar(255)
+    absen_id                   String   @db.VarChar(255)
+    lembur_id                  String   @db.VarChar(255)
+    total_upah                 Int      @db.Integer
+    tanggal                    DateTime @db.Date
+    bulan                      Int      @db.Integer
+    tahun                      Int      @db.Integer
+
+    slip_gaji slip_gaji @relation(fields: [slip_gaji_id], references: [id_slip_gaji], onDelete: Cascade)
+    absensi   absensi   @relation(fields: [absen_id], references: [id_absen], onDelete: Cascade)
+    lembur    lembur    @relation(fields: [lembur_id], references: [id_lembur])
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+model slip_gaji_detail_bonus {
+    id_slip_gaji_detail_bonus String   @id @default(cuid()) @db.VarChar(255)
+    slip_gaji_id              String   @db.VarChar(255)
+    bonus_id                  String   @db.VarChar(255)
+    total_bonus               Int      @db.Integer
+    tanggal                   DateTime @db.Date
+    bulan                     Int      @db.Integer
+    tahun                     Int      @db.Integer
+
+    slip_gaji       slip_gaji       @relation(fields: [slip_gaji_id], references: [id_slip_gaji], onDelete: Cascade)
+    tunjangan_bonus tunjangan_bonus @relation(fields: [bonus_id], references: [id_tunjangan_bonus], onDelete: Cascade)
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+model slip_gaji_detail_fungsional {
+    id_slip_gaji_detail_fungsional String   @id @default(cuid()) @db.VarChar(255)
+    slip_gaji_id                   String   @db.VarChar(255)
+    jabatan__fungsional_id         String   @db.VarChar(255)
+    total_fungsional               Int      @db.Integer
+    tanggal                        DateTime @db.Date
+    bulan                          Int      @db.Integer
+    tahun                          Int      @db.Integer
+
+    slip_gaji          slip_gaji          @relation(fields: [slip_gaji_id], references: [id_slip_gaji], onDelete: Cascade)
+    jabatan_fungsional jabatan_fungsional @relation(fields: [jabatan__fungsional_id], references: [id_jabatan_fungsional], onDelete: Cascade)
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+model slip_gaji_detail_gaji_pokok {
+    id_slip_gaji_detail_gaji_pokok String   @id @default(cuid()) @db.VarChar(255)
+    slip_gaji_id                   String   @db.VarChar(255)
+    jabatan_id                     String   @db.VarChar(255)
+    total_gaji_pokok               Int      @db.Integer
+    tanggal                        DateTime @db.Date
+    bulan                          Int      @db.Integer
+    tahun                          Int      @db.Integer
+
+    slip_gaji slip_gaji @relation(fields: [slip_gaji_id], references: [id_slip_gaji], onDelete: Cascade)
+    jabatan   jabatan   @relation(fields: [jabatan_id], references: [id_jabatan], onDelete: Cascade)
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+model pembayaran_gaji {
+    id_pembayaran_gaji String           @id @default(cuid()) @db.VarChar(255)
+    slip_gaji_id       String           @db.VarChar(255)
+    user_id            String           @db.VarChar(255)
+    metode_pembayaran  MetodePembayaran
+    nomor_transaksi    String?          @db.VarChar(255)
+    tanggal_pembayaran DateTime         @db.Date
+
+    slip_gaji slip_gaji @relation(fields: [slip_gaji_id], references: [id_slip_gaji], onDelete: Cascade)
+    user      user      @relation(fields: [user_id], references: [id_user], onDelete: Cascade)
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+enum MetodePembayaran {
+    cash
+    transfer
+}
+
+// model pembayaran_gaji_pajak_detail
+
+model jenis_izin {
+    id_jenis_izin String    @id @default(cuid()) @db.VarChar(255)
+    nama          String    @db.VarChar(255)
+    jenis         JenisIzin
+    jatah         Int       @db.Integer
+    tahun         Int       @db.Integer
+
+    createdAt       DateTime          @default(now())
+    updatedAt       DateTime          @updatedAt
+    permohonan_izin permohonan_izin[]
+}
+
+enum JenisIzin {
+    cuti
+    izin
+}
+
+model data_lokasi {
+    id_lokasi   String @id @default(cuid()) @db.VarChar(255)
+    nama        String @db.VarChar(255)
+    kode        String @db.VarChar(255)
+    alamat      String @db.VarChar(255)
+    koordinat   String @db.VarChar(255)
+    luas_lokasi Int    @db.Integer
+
+    createdAt DateTime  @default(now())
+    updatedAt DateTime  @updatedAt
+    pegawai   pegawai[]
+}
+
+model shift_kerja {
+    id_shift_kerja String          @id @default(cuid()) @db.VarChar(255)
+    shift_kerja    JenisShiftKerja
+    waktu_masuk    String          @db.VarChar(255)
+    waktu_pulang   String          @db.VarChar(255)
+    durasi_kerja   Int
+    keterangan     String // Shift pagi, siang, dsb.
+
+    createdAt      DateTime         @default(now())
+    updatedAt      DateTime         @updatedAt
+    jadwal_pegawai jadwal_pegawai[]
+}
+
+enum JenisShiftKerja {
+    masa_mbkm
+    libur_mbkm
+}
+
+model jadwal_pegawai {
+    id_jadwal  String   @id @default(cuid()) @db.VarChar(255)
+    pegawai_id String   @db.VarChar(255)
+    shift_id   String   @db.VarChar(255)
+    tanggal    DateTime @db.Date
+
+    pegawai     pegawai     @relation(fields: [pegawai_id], references: [id_pegawai])
+    shift_kerja shift_kerja @relation(fields: [shift_id], references: [id_shift_kerja])
+
+    createdAt DateTime  @default(now())
+    updatedAt DateTime  @updatedAt
+    absensi   absensi[]
+
+    @@index([pegawai_id])
+    @@index([shift_id])
+}
+
+model kategori_libur {
+    id_kategori_libur String @id @default(cuid()) @db.VarChar(255)
+    jenis             String @db.VarChar(255)
+
+    createdAt  DateTime     @default(now())
+    updatedAt  DateTime     @updatedAt
+    data_libur data_libur[]
+}
+
+model data_libur {
+    id_libur          String           @id @default(cuid()) @db.VarChar(255)
+    kategori_libur_id String           @db.VarChar(255)
+    nama              String           @db.VarChar(255)
+    tanggal           DateTime         @db.Date
+    status_absen      StatusAbsenLibur
+
+    kategori_libur kategori_libur @relation(fields: [kategori_libur_id], references: [id_kategori_libur], onDelete: Cascade)
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+enum StatusAbsenLibur {
+    hadir
+    tidak_hadir
+}
+
+model permohonan_izin {
+    id_permohonan_izin String       @id @default(cuid()) @db.VarChar(255)
+    pegawai_id         String       @db.VarChar(255)
+    jenis_mohon_izin   JenisIzin
+    jenis_izin_id      String       @db.VarChar(255)
+    // file
+    bukti              String       @db.VarChar(255)
+    format_bukti       typeBukti
+    tanggal_dari       DateTime     @db.Date
+    tanggal_sampai     DateTime     @db.Date
+    total_hari         Int          @db.Integer
+    keterangan         String       @db.VarChar(255)
+    status             StatusTerima
+
+    pegawai    pegawai    @relation(fields: [pegawai_id], references: [id_pegawai], onDelete: Cascade)
+    jenis_izin jenis_izin @relation(fields: [jenis_izin_id], references: [id_jenis_izin], onDelete: Cascade)
+
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+    user        user?    @relation(fields: [userId_user], references: [id_user])
+    userId_user String?  @db.VarChar(255)
+}
+
+enum typeBukti {
+    image
+    pdf
+}
+
+model app_setting {
+    id_app_setting   String @id @default(cuid()) @db.VarChar(255)
+    nama_sistem      String @db.VarChar(255)
+    singkatan_sistem String @db.VarChar(255)
+    logo_sistem      String @db.VarChar(255)
+    deskripsi_sistem String @db.VarChar(255)
+    developer        String @db.VarChar(255)
+    author           String @db.VarChar(255)
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+model identitas_sekolah {
+    id_identitas_sekolah String   @id @default(cuid()) @db.VarChar(255)
+    nama_sekolah         String   @db.VarChar(255)
+    kementrian           String
+    nsm                  String   @db.VarChar(50)
+    npsn                 String   @db.VarChar(50)
+    status               String   @db.VarChar(30)
+    akreditasi           String   @db.VarChar(20)
+    kota                 String   @db.VarChar(255)
+    provinsi             String   @db.VarChar(255)
+    email                String   @db.VarChar(255)
+    no_telp              String   @db.VarChar(255)
+    kode_pos             String   @db.Char(5)
+    fax                  String?  @db.VarChar()
+    logo                 String   @db.VarChar(255)
+    tanggal_berdiri      DateTime @db.Date
+    website              String   @db.VarChar(255)
+    alamat               String
+    kepala_sekolah       String   @db.VarChar(255)
+
+    kepala_sekolah_id pegawai @relation(fields: [kepala_sekolah], references: [id_pegawai], onDelete: Cascade)
+}
+
+model absensi {
+    id_absen         String        @id @default(cuid()) @db.VarChar(255)
+    pegawai_id       String        @db.VarChar(255)
+    tanggal_absen    DateTime      @db.Date
+    waktu_masuk      String?       @db.VarChar(255)
+    koordinat_masuk  String?       @db.VarChar(255)
+    waktu_pulang     String?       @db.VarChar(255)
+    koordinat_pulang String?       @db.VarChar(255)
+    foto_masuk       String?       @db.VarChar(255)
+    foto_pulang      String?       @db.VarChar(255)
+    status_absen     StatusAbsensi
+    is_lembur        Boolean?      @default(false)
+    jadwal_id        String?       @db.VarChar(255)
+
+    pegawai        pegawai         @relation(fields: [pegawai_id], references: [id_pegawai], onDelete: Cascade)
+    jadwal_pegawai jadwal_pegawai? @relation(fields: [jadwal_id], references: [id_jadwal])
+
+    createdAt               DateTime                  @default(now())
+    updatedAt               DateTime                  @updatedAt
+    slip_gaji_detail_lembur slip_gaji_detail_lembur[]
+    lembur                  lembur[]
+
+    @@index([pegawai_id])
+    @@index([jadwal_id])
+}
+
+enum StatusAbsensi {
+    hadir
+    izin
+    cuti
+    sakit
+    terlambat
+    tidak_hadir
+}
+
+// 
+
+// contoh many to many
+// model Mahasiswa {
+//     id        Int      @id @default(autoincrement())
+//     nama      String
+//     createdAt DateTime @default(now()) @db.Timestamptz
+//     updatedAt DateTime @updatedAt @db.Timestamptz
+//     //   kelas Kelas[] @relation("MahasiswaKelas") // relasi many-to-many
+// }
+
+// model Kelas {
+//   id         Int         @id @default(autoincrement())
+//   nama_kelas String
+//   mahasiswa  Mahasiswa[] @relation("MahasiswaKelas") // relasi many-to-many
+// }
