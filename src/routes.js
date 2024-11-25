@@ -12,7 +12,7 @@ import routesJabatanFungsionalController from "./JabatanFungsional/jabatanFungsi
 import routesStatusKepegawaian from "./StatusKepegawaian/statusKepegawaian.controler.js";
 import routesTunjanganTetap from "./TunjanganTetap/tunjanganTetap.controller.js";
 import routesTunjanganKehadiran from "./TunjanganKehadiran/tunjanganKehadiran.controller.js";
-import routesShiftKerja from "./ShiftKerja/shitKerja.controller.js";
+import routesShiftKerja from "./ShiftKerja/shiftKerja.controller.js";
 import routesDataLokasi from "./DataLokasi/dataLokasi.controller.js";
 import cobaCloud from "./utils/CobaCloudinary/cobaCloud.js";
 import routesPegawai from "./Pegawai/pegawai.controller.js";

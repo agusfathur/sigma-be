@@ -3,6 +3,7 @@ import {
   deleteTunjanganTetapPegawai,
   getAllTunjanganTetapPegawai,
   getTunjanganTetapPegawaiById,
+  getTunjanganTetapPegawaiByPegawaiId,
   insertManyTunjanganTetapPegawai,
   insertTunjanganTetapPegawai,
   updateManyTunjanganTetapPegawai,
@@ -15,7 +16,16 @@ export const GetAllTunjanganTetapPegawai = async () => {
 };
 
 export const GetTunjanganTetapPegawaiById = async (id) => {
-  const data = await getTunjanganTetapPegawaiById(id);
+  const data = await getTunjanganTetapPegawaiByPegawaiId(id);
+  return data;
+};
+
+export const GetTunjanganTetapPegawaiByPegawaiId = async (id) => {
+  const data = await getAllTunjanganTetapPegawai({
+    pegawai: {
+      id_pegawai: id
+    }
+  });
   return data;
 };
 

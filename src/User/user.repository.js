@@ -1,10 +1,11 @@
 import { prisma } from "../utils/prisma.js";
 
-export const findAllUser = async () => {
+export const findAllUser = async (filter = {}) => {
   return await prisma.user.findMany({
     select: {
       id_user: true,
       name: true,
+      image: true,
       username: true,
       email: true,
       role: true,
@@ -14,7 +15,8 @@ export const findAllUser = async () => {
     },
     orderBy: {
       createdAt: "desc"
-    }
+    },
+    where: filter
   });
 };
 
@@ -29,7 +31,8 @@ export const findUserByIdExclude = async (id) => {
       username: true,
       email: true,
       image: true,
-      role: true
+      role: true,
+      pegawai: true
     }
   });
 };

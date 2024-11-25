@@ -6,7 +6,10 @@ export const getAllJadwalPegawai = async (filter = {}) => {
       pegawai: true,
       shift_kerja: true
     },
-    where: filter
+    where: filter,
+    orderBy: {
+      tanggal: "asc"
+    }
   });
 };
 

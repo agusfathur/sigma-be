@@ -22,12 +22,20 @@ export const GetAllTunjanganBonusByCreatedAt = async (tanggalDari, tanggalSampai
 };
 
 export const GetAllTunjanganBonusByBulanTahunPegawai = async (pegawai_id, bulan, tahun) => {
-  let date = new Date(`${tahun}-${bulan}`);
-  let firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
-  let lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+  const firstDay = new Date(tahun, bulan - 1, 1);
+  const lastDay = new Date(tahun, bulan, 0, 23, 59, 59);
   const data = await getAllTunjanganBonus({
     pegawai_id,
     tanggal: { gte: firstDay, lte: lastDay }
+  });
+
+  return data;
+};
+export const GetTunjanganBonusByTahun = async (tahun) => {
+  const start = new Date(`${tahun}-01-01`);
+  const end = new Date(`${tahun}-12-31`);
+  const data = await getAllTunjanganBonus({
+    tanggal: { gte: start, lte: end }
   });
   return data;
 };

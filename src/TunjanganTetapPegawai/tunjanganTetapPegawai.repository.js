@@ -1,6 +1,6 @@
 import { prisma } from "../utils/prisma.js";
 
-export const getAllTunjanganTetapPegawai = async () => {
+export const getAllTunjanganTetapPegawai = async (filter = {}) => {
   const data = await prisma.tunjangan_tetap_pegawai.findMany({
     include: {
       pegawai: true,
@@ -8,15 +8,28 @@ export const getAllTunjanganTetapPegawai = async () => {
     },
     orderBy: {
       createdAt: "desc"
-    }
+    },
+    where: filter
   });
   return data;
 };
 
 export const getTunjanganTetapPegawaiById = async (id) => {
-  const data = await prisma.tunjangan_tetap_pegawai.findUnique({
+  const data = await prisma.tunjangan_tetap_pegawai.findMany({
     where: {
       id_tunjangan_tetap_pegawai: id
+    },
+    include: {
+      pegawai: true,
+      tunjangan_tetap: true
+    }
+  });
+  return data;
+};
+export const getTunjanganTetapPegawaiByPegawaiId = async (id) => {
+  const data = await prisma.tunjangan_tetap_pegawai.findMany({
+    where: {
+      pegawai_id: id
     },
     include: {
       pegawai: true,

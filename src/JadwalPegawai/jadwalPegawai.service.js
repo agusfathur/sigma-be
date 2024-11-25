@@ -12,6 +12,29 @@ export const GetAllJadwalPegawai = async (filter = {}) => {
   return data;
 };
 
+export const GetAllJadwalPegawaiByBulanTahun = async (bulan, tahun) => {
+  const firstDay = new Date(tahun, bulan - 1, 1);
+  const lastDay = new Date(tahun, bulan, 0, 23, 59, 59);
+
+  const data = await getAllJadwalPegawai({ tanggal: { gte: firstDay, lte: lastDay } });
+  return data;
+};
+export const GetAllJadwalPegawaiByPegawaiBulanTahun = async (bulan, tahun, id) => {
+  const firstDay = new Date(tahun, bulan - 1, 1);
+  const lastDay = new Date(tahun, bulan, 0, 23, 59, 59);
+  const data = await getAllJadwalPegawai({ tanggal: { gte: firstDay, lte: lastDay }, pegawai_id: id });
+  return data;
+};
+
+export const GetJadwalByTanggal = async (tanggal) => {
+  const data = await getAllJadwalPegawai({ tanggal: tanggal + "T00:00:00.000Z" });
+  return data;
+};
+export const GetJadwalByPegawaiTanggal = async (tanggal, id) => {
+  const data = await getAllJadwalPegawai({ tanggal: tanggal + "T00:00:00.000Z", pegawai_id: id });
+  return data;
+};
+
 export const GetJadwalPegawaiById = async (id) => {
   const data = await getJadwalPegawaiById(id);
   return data;

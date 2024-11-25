@@ -68,6 +68,7 @@ export const PegawaiCreateSchema = object({
   )
   .refine(
     async (data) => {
+      if (!data.nip) return true;
       const checkNIP = await getPegawaiByNIP(data.nip);
       if (checkNIP) return false;
       return true;

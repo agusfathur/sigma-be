@@ -6,7 +6,11 @@ import {
   CreateAbsensiPulang,
   DeleteAbsensi,
   GetAbsensiById,
+  GetAbsensiByTanggal,
+  GetAbsensiByTanggalPegawai,
   GetAllAbsensi,
+  GetAllAbsensiByBulanTahun,
+  GetAllAbsensiByBulanTahunByPegawai,
   UpdateAbsensi
 } from "./absensi.service.js";
 import { AbsensiBerangkatSchema, AbsensiPulangSchema } from "./absensi.validation.js";
@@ -15,8 +19,20 @@ import { getJadwalPegawaiById } from "../JadwalPegawai/jadwalPegawai.repository.
 const router = express.Router();
 
 router.get("/", async (req, res) => {
+  let getAll;
+  const query = req.query;
   try {
-    const getAll = await GetAllAbsensi();
+    if (query.tanggal) {
+      const tanggal = query.tanggal;
+      getAll = await GetAbsensiByTanggal(tanggal);
+    } else if (query.bulan && query.tahun) {
+      const bulan = query.bulan;
+      const tahun = query.tahun;
+      getAll = await GetAllAbsensiByBulanTahun(bulan, tahun);
+    } else {
+      getAll = await GetAllAbsensi();
+    }
+
     return res.status(200).json({
       status: true,
       statusCode: 200,
@@ -209,23 +225,29 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
-router.get("/:id", async (req, res) => {
-  const id = req.params.id;
+// pegawai absensi
+router.get("/pegawai/:id", async (req, res) => {
+  const pegawaiId = req.params.id;
+  let getAll;
+  const query = req.query;
   try {
-    const getOne = await GetAbsensiById(id);
-    if (!getOne) {
-      return res.status(404).json({
-        status: false,
-        statusCode: 404,
-        message: "Absensi not found",
-        data: {}
-      });
+    if (query.tanggal) {
+      const tanggal = query.tanggal;
+
+      getAll = await GetAbsensiByTanggalPegawai(tanggal, pegawaiId);
+    } else if (query.bulan && query.tahun) {
+      const bulan = query.bulan;
+      const tahun = query.tahun;
+      getAll = await GetAllAbsensiByBulanTahunByPegawai(bulan, tahun, pegawaiId);
+    } else {
+      getAll = await GetAllAbsensi();
     }
+
     return res.status(200).json({
       status: true,
       statusCode: 200,
-      message: "Absensi successfully retrieved",
-      data: getOne
+      message: "Absensi successfully retrieved by pegawai",
+      data: getAll
     });
   } catch (error) {
     return res.status(500).json({

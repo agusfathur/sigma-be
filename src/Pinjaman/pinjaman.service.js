@@ -18,9 +18,8 @@ export const GetAllPinjamanByPegawai = async (pegawaiId) => {
 };
 
 export const GetPinjamanPegawaibyTahunBulan = async (pegawai_id, bulan, tahun) => {
-  let date = new Date(`${tahun}-${bulan}`);
-  let firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
-  let lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+  const firstDay = new Date(tahun, bulan - 1, 1);
+  const lastDay = new Date(tahun, bulan, 0, 23, 59, 59);
   const data = await getAllPinjaman({
     pegawai_id,
     tanggal: { gte: firstDay, lte: lastDay },
@@ -37,6 +36,18 @@ export const GetPinjamanPegawaibyTahunBulan = async (pegawai_id, bulan, tahun) =
 
 export const GetPinjamanById = async (id) => {
   const data = await getPinjamanById(id);
+  return data;
+};
+
+export const GetPinjamanByBulanTahun = async (bulan, tahun) => {
+  const firstDay = new Date(tahun, bulan - 1, 1);
+  const lastDay = new Date(tahun, bulan, 0, 23, 59, 59);
+  const data = await getAllPinjaman({ tanggal: { gte: firstDay, lte: lastDay } });
+  return data;
+};
+
+export const GetPinjamanBytanggal = async (tanggal) => {
+  const data = await getAllPinjaman({ tanggal: tanggal + "T00:00:00.000Z" });
   return data;
 };
 

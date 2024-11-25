@@ -3,6 +3,7 @@ import {
   deletePembayaranGaji,
   getAllPembayaranGaji,
   getPembayaranGajiById,
+  getPembayaranGajiBySlipGajiId,
   insertPembayaranGaji,
   updatePembayaranGaji
 } from "./pembayaranGaji.repository.js";
@@ -16,8 +17,15 @@ export const GetPembayaranGajiById = async (id) => {
   return data;
 };
 
+export const GetPembayaranGajiBySlipGajiId = async (id) => {
+  const data = await getPembayaranGajiBySlipGajiId(id);
+  return data;
+};
+
 export const CreatePembayaranGaji = async (data) => {
+  console.log("from creat gaji", { data });
   const insert = await insertPembayaranGaji(data);
+  console.log({ insert });
   await updateSlipGaji(insert.slip_gaji_id, {
     status_pembayaran: "dibayar"
   });

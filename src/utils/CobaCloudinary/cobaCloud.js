@@ -2,7 +2,7 @@
 import express from "express";
 import multer from "multer";
 
-import { DeleteImage, GetPublicId, UploadFileIzin, UploadImageAbsensi } from "../cloudinary.js";
+import { DeleteImage, GetPublicId, UploadFileIzin, UploadImageAbsensi, UploadImageProfile } from "../cloudinary.js";
 import { isWithinRadius } from "../geolib.js";
 
 const router = express.Router();
@@ -44,6 +44,25 @@ router.post("/izin", async (req, res) => {
       status: true,
       statusCode: 200,
       message: "Coba Cloud Izin successfully retrieved",
+      data: result
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      statusCode: 500,
+      message: error.message || "Internal Server Error",
+      data: {}
+    });
+  }
+});
+router.post("/profile", async (req, res) => {
+  try {
+    const result = await UploadImageProfile(req.files.file.tempFilePath);
+    // const result = req.files.image.tempFilePath;
+    return res.status(200).json({
+      status: true,
+      statusCode: 200,
+      message: "Coba Cloud Profile successfully retrieved",
       data: result
     });
   } catch (error) {

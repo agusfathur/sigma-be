@@ -19,6 +19,21 @@ export const GetAllLemburByPegawai = async (id) => {
   return data;
 };
 
+export const GetAllLemburByTanggal = async (tanggal) => {
+  const data = await getAllLembur({ tanggal: tanggal + "T00:00:00.000Z" });
+  return data;
+};
+
+export const GetLemburPegawaiByTanggal = async (tanggal) => {
+  const data = await getAllLembur({ tanggal: tanggal + "T00:00:00.000Z" });
+  return data;
+};
+
+export const GetLemburPegawaiByPegawaiTanggal = async (id, tanggal) => {
+  const data = await getAllLembur({ pegawai_id: id, tanggal: tanggal + "T00:00:00.000Z" });
+  return data;
+};
+
 export const GetAllLemburByPegawaiAndStatus = async (id, status) => {
   const data = await getAllLembur({
     absensi: {
@@ -30,9 +45,8 @@ export const GetAllLemburByPegawaiAndStatus = async (id, status) => {
 };
 
 export const GetAllLemburByBulanTahun = async (bulan, tahun) => {
-  let date = new Date(`${tahun}-${bulan}`);
-  let firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
-  let lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+  const firstDay = new Date(tahun, bulan - 1, 1);
+  const lastDay = new Date(tahun, bulan, 0, 23, 59, 59);
   const data = await getAllLembur({
     tanggal: {
       gte: firstDay,
@@ -43,9 +57,8 @@ export const GetAllLemburByBulanTahun = async (bulan, tahun) => {
 };
 
 export const GetALemburByPegawaiAndBulanTahunStatus = async (pegawaiId, status_lembur, bulan, tahun) => {
-  let date = new Date(`${tahun}-${bulan}`);
-  let firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
-  let lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+  const firstDay = new Date(tahun, bulan - 1, 1);
+  const lastDay = new Date(tahun, bulan, 0, 23, 59, 59);
   const data = await getAllLembur({
     pegawai_id: pegawaiId,
     status_lembur,
@@ -58,12 +71,10 @@ export const GetALemburByPegawaiAndBulanTahunStatus = async (pegawaiId, status_l
 };
 
 export const GetALemburByPegawaiAndBulanTahun = async (pegawaiId, bulan, tahun) => {
-  let date = new Date(`${tahun}-${bulan}`);
-  let firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
-  let lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+  const firstDay = new Date(tahun, bulan - 1, 1);
+  const lastDay = new Date(tahun, bulan, 0, 23, 59, 59);
   const data = await getAllLembur({
     pegawai_id: pegawaiId,
-    status_lembur,
     tanggal: {
       gte: firstDay,
       lte: lastDay

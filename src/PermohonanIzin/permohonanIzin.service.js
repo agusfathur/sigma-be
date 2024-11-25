@@ -1,3 +1,5 @@
+import { CreateAbsensi, DeleteAbsensi, GetAbsensiByTanggalPegawai } from "../Absensi/absensi.service.js";
+import { GetJadwalByPegawaiTanggal } from "../JadwalPegawai/jadwalPegawai.service.js";
 import { DeleteImage, GetPublicId, UploadFileIzin } from "../utils/cloudinary.js";
 import {
   destroyPermohonanIzin,
@@ -24,6 +26,21 @@ export const GetPermohonanIzinByPegawaiId = async (id) => {
   const getOne = await getAllPermohonanIzinByPegawai(id);
 
   return getOne;
+};
+
+export const GetPermohonanIzinByTanggal = async (tanggal, pegawai_id) => {
+  return await getAllPermohonanIzin({ tanggal_dari: tanggal + "T00:00:00.000Z", pegawai_id: pegawai_id });
+};
+
+export const GetIzinByBulanTahunByPegawai = async (bulan, tahun, id) => {
+  // Get first day of month
+  const firstDay = new Date(tahun, bulan - 1, 1);
+
+  // Get last day of month (day 0 of next month = last day of current month)
+  const lastDay = new Date(tahun, bulan, 0, 23, 59, 59);
+
+  const data = await getAllPermohonanIzin({ tanggal_dari: { gte: firstDay, lte: lastDay }, pegawai_id: id });
+  return data;
 };
 
 export const CreatePermohonanIzin = async (data) => {
@@ -68,9 +85,35 @@ export const UpdatePermohonanIzin = async (id, data) => {
 };
 
 export const UpdateStatusPermohonanIzin = async (id, status) => {
+  const getMohonIzin = await GetPermohonanIzinById(id);
+
   const update = await updatePermohonanIzin(id, {
     status
   });
+  if (status === "diterima") {
+    const pegawai = getMohonIzin.pegawai;
+
+    const dates = getDatesBetween(getMohonIzin.tanggal_dari, getMohonIzin.tanggal_sampai);
+    for await (const tanggal of dates) {
+      const getJadwal = await GetJadwalByPegawaiTanggal(tanggal, pegawai.id_pegawai);
+      const createAbsen = await CreateAbsensi({
+        pegawai_id: pegawai.id_pegawai,
+        tanggal_absen: tanggal + "T00:00:00.000Z",
+        jadwal_id: getJadwal[0].id_jadwal,
+        status_absen: getMohonIzin.jenis_mohon_izin
+      });
+    }
+  } else if (getMohonIzin.status === "diterima" && status === "ditolak") {
+    const pegawai = getMohonIzin.pegawai;
+    console.log("tolak");
+
+    const dates = getDatesBetween(getMohonIzin.tanggal_dari, getMohonIzin.tanggal_sampai);
+    for await (const tanggal of dates) {
+      const getAbsensi = await GetAbsensiByTanggalPegawai(tanggal, pegawai.id_pegawai);
+      const destroyAbsen = await DeleteAbsensi(getAbsensi[0].id_absen);
+      console.log(destroyAbsen);
+    }
+  }
 
   return update;
 };
@@ -106,3 +149,20 @@ export const DifferenceDate = (tglDari, tglSampai) => {
   let Difference_In_Days = Difference_In_Time / (1000 * 3600 * 24) + 1;
   return Math.floor(Difference_In_Days);
 };
+
+function getDatesBetween(startDate, endDate) {
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  const dateArray = [];
+
+  // Loop hingga tanggal start lebih dari end
+  while (start <= end) {
+    // Menambahkan tanggal dalam format YYYY-MM-DD ke array
+    dateArray.push(start.toISOString().split("T")[0]);
+
+    // Menambahkan 1 hari ke tanggal start
+    start.setDate(start.getDate() + 1);
+  }
+
+  return dateArray;
+}

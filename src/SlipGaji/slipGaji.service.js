@@ -33,6 +33,7 @@ import {
 } from "../SlipGajiDetail/SGJ.pinjaman.controller.js";
 import {
   createSlipGajiDetailKehadiran,
+  deleteSlipGajiDetailKehadiran,
   getSlipGajiDetailKehadiranByPegawaiBulanTahun,
   updateSlipGajiDetailKehadiran
 } from "../SlipGajiDetail/SGJ.kehadiran.controller.js";
@@ -57,6 +58,8 @@ import {
   getSlipGajiDetailLemburByPegawaiBulanTahun
 } from "../SlipGajiDetail/SGJ.lembur.controller.js";
 import { getPegawaiById } from "../Pegawai/pegawai.repository.js";
+import { getTunjanganBonusByPegawaiId } from "../TunjanganBonus/tunjanganBonus.repository.js";
+import { GetTunjanganTetapPegawaiById } from "../TunjanganTetapPegawai/tunjanganTetapPegawai.service.js";
 
 export const GetAllSlipGaji = async () => {
   const data = await getAllSlipGaji();
@@ -179,7 +182,6 @@ export const CreateManySlipGaji = async (bulan, tahun) => {
           bulan: insertGaji.bulan,
           tahun: insertGaji.tahun
         });
-        console.log({ createDetailKehadiran });
       }
     }
 
@@ -189,7 +191,6 @@ export const CreateManySlipGaji = async (bulan, tahun) => {
       if (pge.jabatanFungsional.length > 0) {
         for await (const jbf of pge.jabatanFungsional) {
           totalJabatanFungsional += jbf.jabatanFungsional.tunjangan;
-
           // Call the function to create slip gaji detail
           const createDetailFungsional = await createSlipGajiDetailFungsional({
             total_fungsional: jbf.jabatanFungsional.tunjangan,
@@ -214,6 +215,7 @@ export const CreateManySlipGaji = async (bulan, tahun) => {
     let totalTunjanganBonus = 0;
     if (settingGaji.tunjangan_bonus) {
       const bonus = await GetAllTunjanganBonusByBulanTahunPegawai(pge.id_pegawai, bulan, tahun);
+      console.log({ bonus, nama: pge.nama });
       if (bonus.length > 0) {
         for await (const bns of bonus) {
           totalTunjanganBonus += bns.nominal;
@@ -225,6 +227,7 @@ export const CreateManySlipGaji = async (bulan, tahun) => {
             bulan: insertGaji.bulan,
             tahun: insertGaji.tahun
           });
+          console.log({ totalTunjanganBonus, createDetailBonus });
         }
       }
     }
@@ -297,7 +300,7 @@ export const CreateManySlipGaji = async (bulan, tahun) => {
       totalKehadiran +
       totalJabatanFungsional +
       totalTunjanganBonus +
-      totalUpahLembur +
+      totalUpahLembur -
       totalPinjaman -
       totalPotongGaji;
 
@@ -356,6 +359,7 @@ export const CreateSlipGaji = async (data) => {
 
 export const UpdateManySlipGaji = async (bulan, tahun) => {
   const getSlipGaji = await getAllSlipGaji({ bulan, tahun });
+
   if (getSlipGaji.length < 1) {
     return {
       status: true,
@@ -391,18 +395,21 @@ export const UpdateManySlipGaji = async (bulan, tahun) => {
     // Tunjangan Tetap
     let tunjanganTetap = 0;
     if (settingGaji.tunjangan_tetap) {
-      // Mendapatkan detail tunjangan tetap berdasarkan pegawai, bulan, dan tahun
-      const getTunjanganTetap = await getSlipGajiDetailTjTetapByPegawaiBulanTahun(
+      const getTJDetail = await getSlipGajiDetailTjTetapByPegawaiBulanTahun(
         slipGaji.pegawai_id,
         slipGaji.bulan,
         slipGaji.tahun
       );
-      if (getTunjanganTetap.length > 0) {
-        for await (const gtt of getTunjanganTetap) {
-          await deleteSlipGajiDetailTetap(gtt.id_slip_gaji_detail_tetap);
+      if (getTJDetail.length > 0) {
+        for await (const detail of getTJDetail) {
+          await deleteSlipGajiDetailTetap(detail.id_slip_gaji_detail_tetap);
         }
-        // buat ulang
-        for await (const tjTetap of pge.tunjangan_tetap_pegawai) {
+      }
+      // Mendapatkan detail tunjangan tetap berdasarkan pegawai, bulan, dan tahun
+      const getTunjanganTetap = await GetTunjanganTetapPegawaiById(slipGaji.pegawai_id);
+      console.log({ getTunjanganTetap, getTJDetail });
+      if (getTunjanganTetap.length > 0) {
+        for await (const tjTetap of getTunjanganTetap) {
           const tjNominal = await getTunjanganTetapById(tjTetap.tunjangan_tetap_id);
           tunjanganTetap += tjNominal.nominal;
           const createDetailTetap = await createSlipGajiDetailTetap({
@@ -416,6 +423,27 @@ export const UpdateManySlipGaji = async (bulan, tahun) => {
           });
         }
       }
+
+      // if (getTunjanganTetap.length > 0) {
+      //   for await (const gtt of getTunjanganTetap) {
+      //     await deleteSlipGajiDetailTetap(gtt.id_slip_gaji_detail_tetap);
+      //   }
+      //   // buat ulang
+      //   const getTunjanganTetapPge = await getTunjanganBonusByPegawaiId(pge.id_pegawai);
+      //   for await (const tjTetap of getTunjanganTetapPge) {
+      //     const tjNominal = await getTunjanganTetapById(tjTetap.tunjangan_tetap_id);
+      //     tunjanganTetap += tjNominal.nominal;
+      //     const createDetailTetap = await createSlipGajiDetailTetap({
+      //       slip_gaji_id: slipGaji.id_slip_gaji,
+      //       tunjangan_tetap_id: tjNominal.id_tunjangan_tetap,
+      //       tunjangan_tetap_pegawai_id: tjTetap.id_tunjangan_tetap_pegawai,
+      //       total_tetap: tjNominal.nominal,
+      //       tanggal: slipGaji.tanggal,
+      //       bulan: slipGaji.bulan,
+      //       tahun: slipGaji.tahun
+      //     });
+      //   }
+      // }
     }
 
     // kehadiran
@@ -432,15 +460,21 @@ export const UpdateManySlipGaji = async (bulan, tahun) => {
         slipGaji.bulan,
         slipGaji.tahun
       );
-      const updateDetailKehadiran = await updateSlipGajiDetailKehadiran(
-        getDetailKehadiran.id_slip_gaji_detail_kehadiran,
-        {
-          tunjangan_kehadiran_id: tunjanganKehadiran.id_tunjangan_kehadiran,
-          total_kehadiran: absensi.length,
-          upah_per_hadir: tunjanganKehadiran.nominal,
-          total: totalKehadiran
+      if (getDetailKehadiran.length > 0) {
+        for await (const gtk of getDetailKehadiran) {
+          await deleteSlipGajiDetailKehadiran(gtk.id_slip_gaji_detail_kehadiran);
+          const createDetailKehadiran = await createSlipGajiDetailKehadiran({
+            slip_gaji_id: slipGaji.id_slip_gaji,
+            tunjangan_kehadiran_id: tunjanganKehadiran.id_tunjangan_kehadiran,
+            total_kehadiran: absensi.length,
+            upah_per_hadir: tunjanganKehadiran.nominal,
+            total: totalKehadiran,
+            tanggal: slipGaji.tanggal,
+            bulan: slipGaji.bulan,
+            tahun: slipGaji.tahun
+          });
         }
-      );
+      }
     }
 
     // jabatan fungsional
@@ -571,7 +605,6 @@ export const UpdateManySlipGaji = async (bulan, tahun) => {
             bulan: slipGaji.bulan,
             tahun: slipGaji.tahun
           });
-          console.log({ createDetailPinjaman });
         }
       }
     }
@@ -615,7 +648,7 @@ export const UpdateManySlipGaji = async (bulan, tahun) => {
       totalKehadiran +
       totalJabatanFungsional +
       totalTunjanganBonus +
-      totalUpahLembur +
+      totalUpahLembur -
       totalPinjaman -
       totalPotongGaji;
 
@@ -668,7 +701,6 @@ export const UpdateManySlipGaji = async (bulan, tahun) => {
     });
     slipGajiPegawai.push(updateGaji);
   }
-
   return {
     status: true,
     statusCode: 200,

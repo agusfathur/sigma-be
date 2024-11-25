@@ -11,12 +11,13 @@ const findEmail = async (email) => {
 };
 
 export const UserCreateSchema = object({
-  nama: string().min(1, "Name is required").max(200, "Name is too long"),
+  name: string().min(1, "Name is required").max(200, "Name is too long"),
   username: string().min(1, "Username is required").max(20, "Username is too long"),
   password: string().min(8, "Password minimum 8 characters").max(20, "Password is too long"),
   email: string().min(1, "Email is required").email("Email is invalid"),
   role: string().min(1, "Role is required")
 })
+  .partial()
   .refine(
     async (data) => {
       const user = await findUserByUsername(data.username);
@@ -44,7 +45,7 @@ export const UserUpdateSchema = object({
   userId: string(),
   username: string().min(1, "Username is required").max(20, "Username is too long"),
   password: string().min(8, "Password minimum 8 characters").max(20, "Password is too long"),
-  nama: string().min(1, "Name is required").max(200, "Name is too long"),
+  name: string().min(1, "Name is required").max(200, "Name is too long"),
   email: string().min(1, "Email is required").email("Email is invalid"),
   role: string().min(1, "Role is required")
 })

@@ -35,6 +35,7 @@ router.get("/", async (req, res) => {
       data: getAll
     });
   } catch (error) {
+    console.log(error.message);
     return res.status(500).json({
       status: false,
       statusCode: 500,
@@ -117,6 +118,7 @@ router.post("/", async (req, res) => {
     }
 
     const insert = await CreateManySlipGaji(validatedFields.data.bulan, validatedFields.data.tahun);
+    console.log(insert);
     return res.status(201).json({
       status: true,
       statusCode: 201,
@@ -136,7 +138,6 @@ router.post("/", async (req, res) => {
 router.put("/", async (req, res) => {
   const { bulan, tahun } = req.body;
   const data = req.body;
-
   try {
     const validatedFields = SlipGajiCreateSchema.safeParse(data);
     if (!validatedFields.success) {
@@ -163,6 +164,7 @@ router.put("/", async (req, res) => {
       data: update.data
     });
   } catch (error) {
+    console.log(error);
     return res.status(500).json({
       status: false,
       statusCode: 500,

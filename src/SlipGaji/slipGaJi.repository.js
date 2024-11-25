@@ -9,8 +9,8 @@ export const getAllSlipGaji = async (filter = {}) => {
       slip_gaji_detail_kehadiran: true,
       slip_gaji_detail_tetap: true,
       slip_gaji_detail_fungsional: true,
-      slip_gaji_detai_pajak: true,
-      slip_gaji_detai_potong_gaji: true,
+      slip_gaji_detail_pajak: true,
+      slip_gaji_detail_potong_gaji: true,
       slip_gaji_detail_bonus: true,
       slip_gaji_detail_lembur: true,
       slip_gaji_detail_pinjaman: true

@@ -6,6 +6,7 @@ import {
   DeletePembayaranGaji,
   GetAllPembayaranGaji,
   GetPembayaranGajiById,
+  GetPembayaranGajiBySlipGajiId,
   UpdatePembayaranGaji
 } from "./pembayaranGaji.service.js";
 import { pembayaranGajiCreateSchema, pembayaranGajiUpdateSchema } from "./pembayaranGaji.validation.js";
@@ -59,25 +60,25 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-// router.get("/pegawai/:id", async (req, res) => {
-//   const id = req.params.id;
-//   try {
-//     const getPembayaranGaji = await (id);
-//     return res.status(200).json({
-//       status: true,
-//       statusCode: 200,
-//       message: "Pembayaran Gaji successfully retrieved",
-//       data: getPembayaranGaji
-//     });
-//   } catch (error) {
-//     return res.status(500).json({
-//       status: false,
-//       statusCode: 500,
-//       message: error.message,
-//       data: {}
-//     });
-//   }
-// });
+router.get("/slip-gaji/:id", async (req, res) => {
+  const id = req.params.id;
+  try {
+    const getPembayaranGaji = await GetPembayaranGajiBySlipGajiId(id);
+    return res.status(200).json({
+      status: true,
+      statusCode: 200,
+      message: "Pembayaran Gaji successfully retrieved",
+      data: getPembayaranGaji
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      statusCode: 500,
+      message: error.message,
+      data: {}
+    });
+  }
+});
 
 router.post("/", async (req, res) => {
   const data = req.body;
@@ -91,8 +92,7 @@ router.post("/", async (req, res) => {
         data: {}
       });
     }
-    const now = new Date(new Date().toLocaleDateString("id-ID").split("/").reverse().join("-") + "T00:00:00.000Z");
-    validatedFields.data.tanggal_pembayaran = now;
+    console.log(validatedFields.data);
     const create = await CreatePembayaranGaji(validatedFields.data);
     return res.status(201).json({
       status: true,
@@ -101,6 +101,7 @@ router.post("/", async (req, res) => {
       data: create
     });
   } catch (error) {
+    console.log(error.message);
     return res.status(500).json({
       status: false,
       statusCode: 500,

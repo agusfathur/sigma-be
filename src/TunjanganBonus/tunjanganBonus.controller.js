@@ -7,6 +7,7 @@ import {
   GetAllTunjanganBonusByCreatedAt,
   GetTunjanganBonusById,
   GetTunjanganBonusByPegawaiId,
+  GetTunjanganBonusByTahun,
   UpdateTunjanganBonus
 } from "./tunjanganBonus.service.js";
 import { TunjanganBonusCreateSchema, TunjanganBonusUpdateSchema } from "./tunjanganBonus.validation.js";
@@ -14,8 +15,14 @@ import { prisma } from "../utils/prisma.js";
 const router = express.Router();
 
 router.get("/", async (req, res) => {
+  let data;
+  const query = req.query;
   try {
-    const data = await GetAllTunjanganBonus();
+    if (query.tahun) {
+      data = await GetTunjanganBonusByTahun(query.tahun);
+    } else {
+      data = await GetAllTunjanganBonus();
+    }
     return res.status(200).json({
       status: true,
       statusCode: 200,

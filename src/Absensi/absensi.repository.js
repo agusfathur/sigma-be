@@ -6,7 +6,10 @@ export const getAllAbsensi = async (filter = {}) => {
       pegawai: true,
       jadwal_pegawai: true
     },
-    where: filter
+    where: filter,
+    orderBy: {
+      tanggal_absen: "desc"
+    }
   });
 };
 

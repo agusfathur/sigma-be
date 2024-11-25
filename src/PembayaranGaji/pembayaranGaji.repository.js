@@ -25,7 +25,7 @@ export const getPembayaranGajiById = async (id) => {
 };
 
 export const getPembayaranGajiBySlipGajiId = async (id) => {
-  const data = await prisma.pembayaran_gaji.findMany({
+  const data = await prisma.pembayaran_gaji.findFirst({
     where: { slip_gaji_id: id },
     include: {
       user: true,

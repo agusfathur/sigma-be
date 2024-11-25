@@ -18,9 +18,8 @@ export const GetAllPotongGajiByPegawai = async (pegawaiId) => {
 };
 
 export const GetPotonGajiPegawaibyTahunBulan = async (pegawai_id, bulan, tahun) => {
-  let date = new Date(`${tahun}-${bulan}`);
-  let firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
-  let lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+  const firstDay = new Date(tahun, bulan - 1, 1);
+  const lastDay = new Date(tahun, bulan, 0, 23, 59, 59);
   const data = await getAllPotongGaji({
     pegawai_id,
     tanggal: { gte: firstDay, lte: lastDay }

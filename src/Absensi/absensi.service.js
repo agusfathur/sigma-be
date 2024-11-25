@@ -22,6 +22,16 @@ export const GetAbsensiById = async (id) => {
   return data;
 };
 
+export const GetAbsensiByTanggal = async (tanggal) => {
+  const data = await getAllAbsensi({ tanggal_absen: tanggal + "T00:00:00.000Z" });
+  return data;
+};
+
+export const GetAbsensiByTanggalPegawai = async (tanggal, id) => {
+  const data = await getAllAbsensi({ tanggal_absen: tanggal + "T00:00:00.000Z", pegawai_id: id });
+  return data;
+};
+
 export const GetAllAbsensiByPegawai = async (id) => {
   const data = await getAllAbsensi({ pegawai_id: id });
   return data;
@@ -68,26 +78,38 @@ export const GetAllAbsensiByJadwalAndStatusAndLembur = async (id, status, lembur
 };
 
 export const GetAllAbsensiByBulanTahun = async (bulan, tahun) => {
-  let date = new Date(`${tahun}-${bulan}`);
-  let firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
-  let lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+  // Get first day of month
+  const firstDay = new Date(tahun, bulan - 1, 1);
+
+  // Get last day of month (day 0 of next month = last day of current month)
+  const lastDay = new Date(tahun, bulan, 0, 23, 59, 59);
+
   const data = await getAllAbsensi({ tanggal_absen: { gte: firstDay, lte: lastDay } });
   return data;
 };
 
-// enum StatusAbsensi {
-//     hadir
-//     izin
-//     cuti
-//     sakit
-//     terlambat
-//     tidak_hadir
-// }
+export const GetAllAbsensiByBulanTahunByPegawai = async (bulan, tahun, id) => {
+  // Get first day of month
+  const firstDay = new Date(tahun, bulan - 1, 1);
+
+  // Get last day of month (day 0 of next month = last day of current month)
+  const lastDay = new Date(tahun, bulan, 0, 23, 59, 59);
+
+  const data = await getAllAbsensi({
+    tanggal_absen: { gte: firstDay, lte: lastDay },
+    pegawai_id: id
+  });
+  return data;
+};
 
 export const GetAllAbsensiByBulanTahunPegawai = async (pegawai_id, bulan, tahun) => {
   let date = new Date(`${tahun}-${bulan}`);
-  let firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
-  let lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+  // Get first day of month
+  const firstDay = new Date(tahun, bulan - 1, 1);
+
+  // Get last day of month (day 0 of next month = last day of current month)
+  const lastDay = new Date(tahun, bulan, 0, 23, 59, 59);
+
   const data = await getAllAbsensi({
     pegawai_id,
     tanggal_absen: { gte: firstDay, lte: lastDay },
@@ -368,6 +390,7 @@ export const CreateAbsensiPulang = async (data) => {
       const gajiPokokPegawai = dataPegawai.jabatan.gaji;
       const upahLembur = Math.floor(((gajiPokokPegawai * 1) / 173) * kalianLembur);
       const lembur = await insertLembur({
+        tanggal: checkAbsensiHariIni[0].tanggal_absen,
         pegawai_id: data.pegawai_id,
         absensi_id: checkAbsensiHariIni[0].id_absen,
         jumlah_upah: kalianLembur,

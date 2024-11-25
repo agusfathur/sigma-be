@@ -24,13 +24,8 @@ export const getPegawaiById = async (id) => {
     where: {
       id_pegawai: id
     },
-
-    select: {
-      id_pegawai: true,
-      nama: true,
-      status_pegawai: true,
+    include: {
       jabatan: true,
-      tunjangan_tetap_pegawai: true,
       jabatanFungsional: {
         include: {
           jabatanFungsional: true
@@ -102,9 +97,22 @@ export const getPegawaiByNIK = async (nik) => {
 
   return await getPegawaiById(pegawai.id_pegawai);
 };
+export const getPegawaiByUser = async (user_id) => {
+  const pegawai = await prisma.pegawai.findFirst({
+    where: {
+      user_id
+    }
+  });
+
+  if (!pegawai) {
+    return null;
+  }
+
+  return await getPegawaiById(pegawai.id_pegawai);
+};
 
 export const getPegawaiByNIP = async (nip) => {
-  const pegawai = await prisma.pegawai.findUnique({
+  const pegawai = await prisma.pegawai.findFirst({
     where: {
       nip
     }

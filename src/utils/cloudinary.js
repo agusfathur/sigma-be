@@ -35,7 +35,7 @@ export const validateImage = (image) => {
   const fileName = image.md5 + ext;
   return {
     status: true,
-    message: "Success Validation Image",
+    message: "",
     data: {
       fileName,
       path: image.tempFilePath
@@ -54,6 +54,14 @@ export const UploadImageProfile = async (image) => {
 export const UploadImageAbsensi = async (image) => {
   const result = await cloudinary.uploader.upload(image, {
     folder: "absensi"
+  });
+
+  return result;
+};
+
+export const UploadImageAppLogo = async (image) => {
+  const result = await cloudinary.uploader.upload(image, {
+    folder: "app-logo"
   });
 
   return result;

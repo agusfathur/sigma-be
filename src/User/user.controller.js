@@ -1,15 +1,29 @@
 // @ts-nocheck
 import express from "express";
 import { findAllUser, insertUser } from "./user.repository.js";
-import { CreateUser, DeleteUserById, GetAllUser, GetUserById, UpdateUserById } from "./user.service.js";
+import {
+  CreateUser,
+  DeleteUserById,
+  GetAllUser,
+  GetAllUserByRole,
+  GetUserById,
+  UpdateUserById
+} from "./user.service.js";
 import { UserCreateSchema, UserUpdateSchema } from "./user.validation.js";
+import { validateImage } from "../utils/cloudinary.js";
 
 const router = express.Router();
 
 // Get All User
 router.get("/", async (req, res) => {
+  let userAll;
+  const query = req.query;
   try {
-    const userAll = await GetAllUser();
+    if (query.role) {
+      userAll = await GetAllUserByRole(query.role);
+    } else {
+      userAll = await GetAllUser();
+    }
     return res.status(200).json({
       status: true,
       statusCode: 200,
@@ -62,17 +76,19 @@ router.post("/", async (req, res) => {
   const data = req.body;
 
   try {
+    const validatedImage = validateImage(req.files?.image);
     const validatedFields = await UserCreateSchema.safeParseAsync(data);
 
-    if (!validatedFields.success) {
-      return res.status(400).json({
+    if (!validatedFields.success || !validatedImage.status) {
+      return res.status(20).json({
         status: false,
         statusCode: 400,
-        message: validatedFields.error.flatten().fieldErrors,
+        message: { ...validatedFields?.error?.flatten()?.fieldErrors, ...validatedImage?.message },
         data: {}
       });
     }
 
+    validatedFields.data.image = validatedImage.data.path;
     const result = await CreateUser(validatedFields.data);
 
     return res.status(201).json({
@@ -108,13 +124,26 @@ router.put("/:id", async (req, res) => {
       });
     }
     data.userId = userId;
+
     const validatedFields = await UserUpdateSchema.safeParseAsync(data);
 
-    if (!validatedFields.success) {
+    let validatedImage;
+    if (req.files?.image) {
+      const image = req.files?.image;
+      validatedImage = validateImage(image);
+      validatedFields.data.image = validatedImage.data.path;
+    } else {
+      validatedImage = {
+        status: true
+      };
+    }
+
+    console.log(validatedFields.data);
+    if (!validatedFields.success || !validatedImage.status) {
       return res.status(400).json({
         status: false,
         statusCode: 400,
-        message: validatedFields.error.flatten().fieldErrors,
+        message: { ...validatedFields.error.flatten().fieldErrors, ...validatedImage.message },
         data: {}
       });
     }
@@ -127,6 +156,7 @@ router.put("/:id", async (req, res) => {
       data: update
     });
   } catch (error) {
+    console.log(error);
     return res.status(500).json({
       status: false,
       statusCode: 500,

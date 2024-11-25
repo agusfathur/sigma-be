@@ -2,6 +2,7 @@
 import express from "express";
 import { identitasSekolahSchema } from "./identitasSekolah.validation.js";
 import { GetIdentitasSekolah, UpdateIdentitasSekolah } from "./identitasSekolah.service.js";
+import { validateImage } from "../utils/cloudinary.js";
 
 const router = express.Router();
 
@@ -30,11 +31,22 @@ router.put("/:id", async (req, res) => {
 
   const validatedFields = await identitasSekolahSchema.safeParseAsync(data);
 
-  if (!validatedFields.success) {
+  let validatedImage;
+  if (req.files?.logo) {
+    const image = req.files?.logo;
+    validatedImage = validateImage(image);
+    validatedFields.data.logo = validatedImage.data.path;
+  } else {
+    validatedImage = {
+      message: "",
+      status: true
+    };
+  }
+  if (!validatedFields.success || !validatedImage.status) {
     return res.status(400).json({
       status: false,
       statusCode: 400,
-      message: validatedFields.error.flatten().fieldErrors,
+      message: { ...validatedFields.error.flatten().fieldErrors, ...validatedImage.message },
       data: {}
     });
   }

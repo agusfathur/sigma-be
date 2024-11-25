@@ -5,7 +5,9 @@ import {
   DeletePinjamanById,
   GetAllPinjaman,
   GetAllPinjamanByPegawai,
+  GetPinjamanByBulanTahun,
   GetPinjamanById,
+  GetPinjamanBytanggal,
   UpdatePinjamanById,
   UpdateStatusPinjamanById
 } from "./pinjaman.service.js";
@@ -14,8 +16,16 @@ import { PinjamanCreateSchema, PinjamanUpdateSchema } from "./pinjaman.validatio
 const router = express.Router();
 
 router.get("/", async (req, res) => {
+  let pinjaman;
+  const query = req.query;
   try {
-    const pinjaman = await GetAllPinjaman();
+    if (query.bulan && query.tahun) {
+      pinjaman = await GetPinjamanByBulanTahun(query.bulan, query.tahun);
+    } else if (query.tanggal) {
+      pinjaman = await GetPinjamanBytanggal(query.tanggal);
+    } else {
+      pinjaman = await GetAllPinjaman();
+    }
     return res.status(200).json({
       status: true,
       statusCode: 200,
@@ -122,7 +132,6 @@ router.put("/status/:id", async (req, res) => {
   const pinjamanId = req.params.id;
   try {
     const { status_pinjaman } = data;
-    console.log(status_pinjaman);
     const cekPinjaman = await GetPinjamanById(pinjamanId);
     if (!cekPinjaman) {
       return res.status(404).json({

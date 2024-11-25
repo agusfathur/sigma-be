@@ -11,6 +11,7 @@ import {
   getPegawaiByNIP,
   getPegawaiByNoRek,
   getPegawaiByStatus,
+  getPegawaiByUser,
   insertPegawai,
   updatePegawaiById
 } from "./pegawai.repository.js";
@@ -26,6 +27,10 @@ export const GetPegawaiById = async (id) => {
 };
 export const GetPegawaiByEmail = async (email) => {
   const data = await getPegawaiByEmail(email);
+  return data;
+};
+export const GetPegawaiByUserId = async (userId) => {
+  const data = await getPegawaiByUser(userId);
   return data;
 };
 
@@ -58,7 +63,7 @@ export const CreatePegawai = async (data) => {
         {
           username: username,
           password: password,
-          nama: pegawaiData.nama,
+          name: pegawaiData.nama,
           email: pegawaiData.email,
           role: role,
           image: pegawaiData.foto
@@ -69,7 +74,7 @@ export const CreatePegawai = async (data) => {
       pegawaiData.foto = createdUser.image;
 
       // Mengonversi array menjadi string tanpa tanda kurung siku dan tanpa tanda kutip di sekitar setiap elemen
-
+      console.log(jabatan_fungsional_id);
       const createdPegawai = await insertPegawai(pegawaiData, prisma);
       let pegawaiJabatanFungsional;
       if (jabatan_fungsional_id && jabatan_fungsional_id.length > 0 && createdPegawai.id_pegawai !== null) {
@@ -79,6 +84,7 @@ export const CreatePegawai = async (data) => {
             jabatan_fungsional_id: id
           }))
         });
+        console.log(pegawaiJabatanFungsional);
       }
       if (createdPegawai.id_pegawai === null) {
         if (createdUser.id_user !== null) {
@@ -106,29 +112,85 @@ export const UpdatePegawai = async (id, data) => {
   try {
     const result = await prisma.$transaction(async (prisma) => {
       const { pegawaiId, jabatan_fungsional_id, ...pegawaiData } = data.dataPegawai;
+      console.log(jabatan_fungsional_id);
 
       const updatedPegawai = await updatePegawaiById(id, pegawaiData, prisma);
       let userData;
       let updatedUser;
       if (data.dataUser) {
-        userData = data.dataUser;
+        // Destructure data yang dibutuhkan
+        const { nama, ...otherData } = data.dataUser;
+
+        // Buat objek userData dengan data yang benar
+        userData = {
+          ...otherData,
+          name: data.dataUser.nama // Gunakan name langsung
+        };
+
+        // Update user
         updatedUser = await UpdateUserById(getPegawai.user_id, userData, prisma);
       }
 
       let pegawaiJabatanFungsional;
-      if (jabatan_fungsional_id && jabatan_fungsional_id.length > 0) {
+
+      // Ambil jabatan fungsional yang ada saat ini
+      const existingJabatan = getPegawai.jabatanFungsional?.map((jbt) => jbt.jabatan_fungsional_id) || [];
+
+      // Jika input jabatan kosong dan sebelumnya ada jabatan
+      if ((!jabatan_fungsional_id || jabatan_fungsional_id.length === 0) && existingJabatan.length > 0) {
+        // Hapus semua jabatan
         await prisma.pegawaiJabatanFungsional.deleteMany({
           where: {
             pegawai_id: updatedPegawai.id_pegawai
           }
         });
-        pegawaiJabatanFungsional = await prisma.pegawaiJabatanFungsional.createMany({
-          data: jabatan_fungsional_id.map((id) => ({
-            pegawai_id: updatedPegawai.id_pegawai,
-            jabatan_fungsional_id: id
-          }))
-        });
       }
+      // Jika ada input jabatan baru
+      else if (jabatan_fungsional_id && jabatan_fungsional_id.length > 0) {
+        // Jika belum ada jabatan sama sekali
+        if (existingJabatan.length === 0) {
+          // Langsung tambah semua jabatan baru
+          pegawaiJabatanFungsional = await prisma.pegawaiJabatanFungsional.createMany({
+            data: jabatan_fungsional_id.map((id) => ({
+              pegawai_id: updatedPegawai.id_pegawai,
+              jabatan_fungsional_id: id
+            }))
+          });
+        }
+        // Jika sudah ada jabatan sebelumnya
+        else {
+          // Cari jabatan yang perlu dihapus dan ditambah
+          const jabatanToDelete = existingJabatan.filter((id) => !jabatan_fungsional_id.includes(id));
+          const jabatanToAdd = jabatan_fungsional_id.filter((id) => !existingJabatan.includes(id));
+
+          // Jika ada perubahan (penambahan atau pengurangan)
+          if (jabatanToAdd.length > 0 || jabatanToDelete.length > 0) {
+            // Hapus jabatan yang tidak ada di input
+            if (jabatanToDelete.length > 0) {
+              await prisma.pegawaiJabatanFungsional.deleteMany({
+                where: {
+                  AND: [{ pegawai_id: updatedPegawai.id_pegawai }, { jabatan_fungsional_id: { in: jabatanToDelete } }]
+                }
+              });
+            }
+
+            // Tambah jabatan baru
+            if (jabatanToAdd.length > 0) {
+              pegawaiJabatanFungsional = await prisma.pegawaiJabatanFungsional.createMany({
+                data: jabatanToAdd.map((id) => ({
+                  pegawai_id: updatedPegawai.id_pegawai,
+                  jabatan_fungsional_id: id
+                }))
+              });
+            }
+          }
+        }
+      }
+
+      // Debug log
+      console.log("Existing Jabatan:", existingJabatan);
+      console.log("Input Jabatan:", jabatan_fungsional_id);
+      console.log("Created Jabatan:", pegawaiJabatanFungsional);
       return { updatedPegawai, updatedUser, pegawaiJabatanFungsional };
     });
 
@@ -177,7 +239,7 @@ export const DeletePegawai = async (id) => {
         });
       }
       const deletedPegawai = await destroyPegawai(id, prisma);
-      const deletedUser = await DeleteUserById(getPegawai.user_id, prisma);
+      const deletedUser = await DeleteUserById(getPegawai.user.id_user, prisma);
 
       if (deletedPegawai && deletedUser && deletedJabatanFungsional) {
         return { deletedPegawai, deletedUser, deletedJabatanFungsional };
@@ -186,14 +248,14 @@ export const DeletePegawai = async (id) => {
     });
 
     let deleteImage;
-    if (getPegawai.foto) {
-      const publidImageId = GetPublicId(getPegawai.foto);
-      deleteImage = await DeleteImage(publidImageId);
-    }
+
+    const publidImageId = GetPublicId(getPegawai.foto);
+    deleteImage = await DeleteImage(publidImageId);
+    console.log(deleteImage);
 
     return { result: "ok" };
   } catch (error) {
-    console.error("Error updating pegawai and user:", error);
+    console.error("Error delete pegawai and user:", error);
     throw error;
   }
 };

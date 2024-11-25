@@ -12,21 +12,25 @@ import {
 } from "./user.repository.js";
 
 import { prisma } from "../utils/prisma.js";
+import { DeleteImage, GetPublicId, UploadImageProfile } from "../utils/cloudinary.js";
 
 export const CreateUser = async (data, prismaInstance = prisma) => {
-  const { username, email, password, nama, role } = data;
-
+  const { username, email, password, name, role } = data;
   const hashedPassword = bcrypt.hashSync(password, 10);
   const create = await insertUser(
     {
       username,
       email,
       password: hashedPassword,
-      nama,
+      name,
       role
     },
     prismaInstance
   );
+
+  const uploadImage = await UploadImageProfile(data.image);
+
+  await updateUserById(create.id_user, { image: uploadImage.secure_url }, prismaInstance);
 
   return create;
 };
@@ -44,6 +48,10 @@ export const ChangeUsername = async (id, username, prismaInstance = prisma) => {
 export const GetAllUser = async () => {
   const allUser = await findAllUser();
   return allUser;
+};
+
+export const GetAllUserByRole = async (role) => {
+  return await findAllUser({ role: { in: role } });
 };
 
 export const GetUserById = async (id) => {
@@ -72,9 +80,19 @@ export const UpdateUserById = async (id, data, prismaInstance = prisma) => {
     data.password = hashedPassword;
   }
 
-  const { userId, ...updatedData } = data;
+  const { userId, image, ...updatedData } = data;
 
   const update = await updateUserById(id, updatedData, prismaInstance);
+
+  if (image && update.image) {
+    const publicId = GetPublicId(update.image);
+    await DeleteImage(publicId);
+
+    const uploadImage = await UploadImageProfile(image);
+
+    await updateUserById(id, { image: uploadImage.secure_url }, prismaInstance);
+  }
+
   return update;
 };
 

@@ -14,7 +14,7 @@ export const identitasSekolahSchema = object({
   no_telp: string().min(1, "No. Telp. is required").max(255, "No. Telp. is too long"),
   kode_pos: string().min(1, "Kode Pos is required").max(5, "Kode Pos is too long"),
   fax: string().max(255, "Fax is too long"),
-  logo: string().min(1, "Logo is required"),
   website: string().min(1, "Website is required").max(255, "Website is too long"),
-  alamat: string().min(1, "Address is required").max(255, "Address is too long")
+  alamat: string().min(1, "Address is required").max(255, "Address is too long"),
+  kepala_sekolah: string().min(1, "Headmaster is required").max(255, "Headmaster is too long")
 }).partial();

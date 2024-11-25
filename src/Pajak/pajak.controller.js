@@ -90,7 +90,7 @@ router.put("/:id", async (req, res) => {
 
   try {
     const getData = await GetPajakById(id);
-    if (getData.length === 0) {
+    if (!getData) {
       return res.status(404).json({
         status: false,
         statusCode: 404,
@@ -98,7 +98,6 @@ router.put("/:id", async (req, res) => {
         data: {}
       });
     }
-
     const validatedFields = await PajakUpdateSchema.safeParseAsync(data);
 
     if (!validatedFields.success) {
@@ -109,6 +108,8 @@ router.put("/:id", async (req, res) => {
         data: {}
       });
     }
+    validatedFields.data.persen = Number(validatedFields.data.persen);
+    console.log(validatedFields.data);
     const update = await UpdatePajak(id, validatedFields.data);
     return res.status(200).json({
       status: true,
@@ -117,6 +118,7 @@ router.put("/:id", async (req, res) => {
       data: update
     });
   } catch (error) {
+    console.log(error.message);
     return res.status(500).json({
       status: false,
       statusCode: 500,
@@ -128,7 +130,6 @@ router.put("/:id", async (req, res) => {
 
 router.delete("/:id", async (req, res) => {
   const id = req.params.id;
-
   try {
     const getData = await GetPajakById(id);
     if (getData.length === 0) {

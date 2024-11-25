@@ -3,9 +3,14 @@ import express from "express";
 import {
   CreateLembur,
   DeleteLembur,
+  GetALemburByPegawaiAndBulanTahun,
   GetAllLembur,
+  GetAllLemburByBulanTahun,
   GetAllLemburByPegawai,
+  GetAllLemburByTanggal,
   GetLemburById,
+  GetLemburPegawaiByPegawaiTanggal,
+  GetLemburPegawaiByTanggal,
   UpdateLembur,
   UpdateStatusLemburPegawai
 } from "./lembur.service.js";
@@ -14,8 +19,16 @@ import { LemburCreateSchema, LemburUpdateSchema } from "./lembur.validation.js";
 const router = express.Router();
 
 router.get("/", async (req, res) => {
+  let getAll;
+  const query = req.query;
   try {
-    const getAll = await GetAllLembur();
+    if (query.tanggal) {
+      getAll = await GetAllLemburByTanggal(query.tanggal);
+    } else if (query.bulan && query.tahun) {
+      getAll = await GetAllLemburByBulanTahun(query.bulan, query.tahun);
+    } else {
+      getAll = await GetAllLembur();
+    }
     return res.status(200).json({
       status: true,
       statusCode: 200,
@@ -62,15 +75,15 @@ router.get("/:id", async (req, res) => {
 
 router.get("/pegawai/:id", async (req, res) => {
   const id = req.params.id;
+  const query = req.query;
+  let data;
   try {
-    const data = await GetAllLemburByPegawai(id);
-    if (data.length === 0) {
-      return res.status(404).json({
-        status: false,
-        statusCode: 404,
-        message: "Lembur Not Found",
-        data: {}
-      });
+    if (query.bulan && query.tahun) {
+      data = await GetALemburByPegawaiAndBulanTahun(id, query.bulan, query.tahun);
+    } else if (query.tanggal) {
+      data = await GetLemburPegawaiByPegawaiTanggal(id, query.tanggal);
+    } else {
+      data = await GetAllLemburByPegawai(id);
     }
 
     return res.status(200).json({
@@ -80,6 +93,8 @@ router.get("/pegawai/:id", async (req, res) => {
       data
     });
   } catch (error) {
+    console.log(error);
+
     return res.status(500).json({
       status: false,
       statusCode: 500,
@@ -133,7 +148,7 @@ router.put("/status/:id", async (req, res) => {
         data: {}
       });
     }
-    const update = await UpdateStatusLemburPegawai(id, data);
+    const update = await UpdateStatusLemburPegawai(id, data.status_lembur);
     return res.status(200).json({
       status: true,
       statusCode: 200,

@@ -1,4 +1,4 @@
-import { getAllPajak, getPajakById, insertPajak, updatePajak } from "./pajak.repository.js";
+import { destroyPajakById, getAllPajak, getPajakById, insertPajak, updatePajak } from "./pajak.repository.js";
 
 export const GetAllPajak = async () => {
   const data = await getAllPajak();
@@ -21,6 +21,6 @@ export const UpdatePajak = async (id, data) => {
 };
 
 export const DeletePajak = async (id) => {
-  const destroy = await getPajakById(id);
+  const destroy = await destroyPajakById(id);
   return destroy;
 };

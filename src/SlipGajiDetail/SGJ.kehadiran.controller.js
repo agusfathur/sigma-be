@@ -16,7 +16,7 @@ export const getSlipGajiDetailKehadiran = async (filter = {}) => {
 };
 
 export const getSlipGajiDetailKehadiranByPegawaiBulanTahun = async (pegawai_id, bulan, tahun) => {
-  return await prisma.slip_gaji_detail_kehadiran.findFirst({
+  return await prisma.slip_gaji_detail_kehadiran.findMany({
     where: {
       slip_gaji: {
         pegawai_id: pegawai_id

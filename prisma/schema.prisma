@@ -74,7 +74,7 @@ model pegawai {
     nomor_hp              String        @unique @db.VarChar(255)
     foto                  String?       @db.VarChar(255)
     nik                   String        @unique @db.VarChar(255)
-    nip                   String?       @unique @db.VarChar(255)
+    nip                   String        @default("") @db.VarChar(255)
     tempat_lahir          String        @db.VarChar(255)
     tanggal_lahir         DateTime      @db.Date
     tanggal_masuk         DateTime      @db.Date
@@ -90,7 +90,7 @@ model pegawai {
     status_pernikahan     String        @db.VarChar(255)
     jumlah_istri          Int           @db.Integer
     jumlah_anak           Int           @db.Integer
-    nomor_rekening        String?       @unique @db.VarChar(255)
+    nomor_rekening        String        @default("") @db.VarChar(255)
     status_pegawai        StatusPegawai
     user_id               String        @db.VarChar(255)
     lokasi_id             String        @db.VarChar(255)
@@ -323,18 +323,18 @@ model slip_gaji {
 
     pegawai pegawai @relation(fields: [pegawai_id], references: [id_pegawai])
 
-    createdAt                   DateTime                       @default(now())
-    updatedAt                   DateTime                       @updatedAt
-    pembayaran_gaji             pembayaran_gaji[]
-    slip_gaji_detai_pajak       slip_gaji_detail_pajak[]
-    slip_gaji_detai_potong_gaji slip_gaji_detail_potong_gaji[]
-    slip_gaji_detail_pinjaman   slip_gaji_detail_pinjaman[]
-    slip_gaji_detail_kehadiran  slip_gaji_detail_kehadiran[]
-    slip_gaji_detail_lembur     slip_gaji_detail_lembur[]
-    slip_gaji_detail_bonus      slip_gaji_detail_bonus[]
-    slip_gaji_detail_fungsional slip_gaji_detail_fungsional[]
-    slip_gaji_detail_gaji_pokok slip_gaji_detail_gaji_pokok[]
-    slip_gaji_detail_tetap      slip_gaji_detail_tetap[]
+    createdAt                    DateTime                       @default(now())
+    updatedAt                    DateTime                       @updatedAt
+    pembayaran_gaji              pembayaran_gaji[]
+    slip_gaji_detail_pajak       slip_gaji_detail_pajak[]
+    slip_gaji_detail_potong_gaji slip_gaji_detail_potong_gaji[]
+    slip_gaji_detail_pinjaman    slip_gaji_detail_pinjaman[]
+    slip_gaji_detail_kehadiran   slip_gaji_detail_kehadiran[]
+    slip_gaji_detail_lembur      slip_gaji_detail_lembur[]
+    slip_gaji_detail_bonus       slip_gaji_detail_bonus[]
+    slip_gaji_detail_fungsional  slip_gaji_detail_fungsional[]
+    slip_gaji_detail_gaji_pokok  slip_gaji_detail_gaji_pokok[]
+    slip_gaji_detail_tetap       slip_gaji_detail_tetap[]
 }
 
 enum StatusPmbayaran {

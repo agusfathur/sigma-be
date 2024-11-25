@@ -1,10 +1,14 @@
 // @ts-nocheck
-import express from "express";
+import express, { query } from "express";
 import {
   CreateJadwalPegawai,
   DestroyJadwalPegawai,
   GetAllJadwalPegawai,
+  GetAllJadwalPegawaiByBulanTahun,
   GetAllJadwalPegawaiByPegawai,
+  GetAllJadwalPegawaiByPegawaiBulanTahun,
+  GetJadwalByPegawaiTanggal,
+  GetJadwalByTanggal,
   GetJadwalPegawaiById,
   UpdateJadwalPegawai
 } from "./jadwalPegawai.service.js";
@@ -14,9 +18,12 @@ const router = express.Router();
 
 router.get("/", async (req, res) => {
   let getAll;
+  const query = req.query;
   try {
-    if (req.query.tanggal) {
-      getAll = await GetAllJadwalPegawai({ tanggal: req.query.tanggal });
+    if (query.tanggal) {
+      getAll = await GetJadwalByTanggal(query.tanggal);
+    } else if (query.bulan && query.tahun) {
+      getAll = await GetAllJadwalPegawaiByBulanTahun(query.bulan, query.tahun);
     } else {
       getAll = await GetAllJadwalPegawai();
     }
@@ -68,9 +75,17 @@ router.get("/:id", async (req, res) => {
 
 router.get("/pegawai/:id", async (req, res) => {
   const id = req.params.id;
-
+  const query = req.query;
+  let getByPegawai;
   try {
-    const getByPegawai = await GetAllJadwalPegawaiByPegawai(id);
+    if (query.tanggal) {
+      getByPegawai = await GetJadwalByPegawaiTanggal(query.tanggal, id);
+    } else if (query.bulan && query.tahun) {
+      getByPegawai = await GetAllJadwalPegawaiByPegawaiBulanTahun(query.bulan, query.tahun, id);
+    } else {
+      getByPegawai = await GetAllJadwalPegawaiByPegawai(id);
+    }
+    console.log(getByPegawai);
     return res.status(200).json({
       status: true,
       statusCode: 200,
