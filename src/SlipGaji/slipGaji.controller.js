@@ -91,7 +91,7 @@ router.get("/pegawai/:id", async (req, res) => {
       status: true,
       statusCode: 200,
       message: "Slip Gaji successfully retrieved",
-      data: getAll
+      data: getAllData
     });
   } catch (error) {
     return res.status(500).json({

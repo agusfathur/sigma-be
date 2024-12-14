@@ -23,11 +23,9 @@ export const getPinjamanById = async (id) => {
   });
 };
 
-export const getAllPinjamanByPegawai = async (id) => {
+export const getAllPinjamanByPegawai = async (id, filter = {}) => {
   return await prisma.pinjaman.findMany({
-    where: {
-      pegawai_id: id
-    },
+    where: { pegawai_id: id, ...filter },
     include: {
       pegawai: true
     },

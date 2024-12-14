@@ -6,7 +6,7 @@ export const getAllTHR = async (filter = {}) => {
       pegawai: true
     },
     orderBy: {
-      createdAt: "desc"
+      tahun: "desc"
     },
     where: filter
   });

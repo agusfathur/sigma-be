@@ -17,6 +17,18 @@ export const GetAllPinjamanByPegawai = async (pegawaiId) => {
   return data;
 };
 
+export const GetAllPinjamanByPegawaiTanggal = async (pegawaiId, tanggal) => {
+  const data = await getAllPinjamanByPegawai(pegawaiId, { tanggal: tanggal + "T00:00:00.000Z" });
+  return data;
+};
+
+export const GetAllPinjamanByPegawaiBulanTahun = async (pegawaiId, bulan, tahun) => {
+  const firstDay = new Date(tahun, bulan - 1, 1);
+  const lastDay = new Date(tahun, bulan, 0, 23, 59, 59);
+  const data = await getAllPinjamanByPegawai(pegawaiId, { tanggal: { gte: firstDay, lte: lastDay } });
+  return data;
+};
+
 export const GetPinjamanPegawaibyTahunBulan = async (pegawai_id, bulan, tahun) => {
   const firstDay = new Date(tahun, bulan - 1, 1);
   const lastDay = new Date(tahun, bulan, 0, 23, 59, 59);

@@ -9,7 +9,8 @@ import {
   GetPermohonanIzinByPegawaiId,
   UpdateStatusPermohonanIzin,
   GetIzinByBulanTahunByPegawai,
-  GetPermohonanIzinByTanggal
+  GetPermohonanIzinByTanggal,
+  GetPermohonanIzinByTahun
 } from "./permohonanIzin.service.js";
 import { PermohonanIzinCreateSchema, PermohonanIzinUpdateSchema } from "./permohonanIzin.validartion.js";
 import { ValidateFileIzin } from "../utils/cloudinary.js";
@@ -62,6 +63,8 @@ router.get("/pegawai/:id", async (req, res) => {
   try {
     if (query.bulan && query.tahun) {
       permohonanIzin = await GetIzinByBulanTahunByPegawai(query.bulan, query.tahun, pegawaiId);
+    } else if (query.tahun) {
+      permohonanIzin = await GetPermohonanIzinByTahun(query.tahun, pegawaiId);
     } else if (query.tanggal) {
       permohonanIzin = await GetPermohonanIzinByTanggal(query.tanggal, pegawaiId);
     } else {

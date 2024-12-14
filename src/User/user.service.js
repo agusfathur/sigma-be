@@ -96,6 +96,12 @@ export const UpdateUserById = async (id, data, prismaInstance = prisma) => {
   return update;
 };
 
+export const UpdateUserPassword = async (id, password, prismaInstance = prisma) => {
+  const hashedPassword = await bcrypt.hashSync(password, 10);
+  const update = await updateUserById(id, { password: hashedPassword }, prismaInstance);
+  return update;
+};
+
 export const DeleteUserById = async (id, prismaInstance = prisma) => {
   const deleteUser = await destroyUser(id, prismaInstance);
   return deleteUser;

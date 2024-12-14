@@ -83,6 +83,7 @@ model pegawai {
     agama                 Agama
     alamat                String        @db.VarChar(255)
     tenaga                TenagaRole    @default(pendidik)
+    status_tetap          StatusTetap   @default(tidak_tetap)
     jabatan_id            String        @db.VarChar(255)
     // relasi ke jabatan fungsional
     status_kepegawaian_id String        @db.VarChar(255)
@@ -146,6 +147,11 @@ enum StatusPegawai {
 enum Gender {
     laki_laki
     perempuan
+}
+
+enum StatusTetap {
+    tetap
+    tidak_tetap
 }
 
 enum TenagaRole {
@@ -304,7 +310,6 @@ model setting_gaji {
 model slip_gaji {
     id_slip_gaji         String          @id @default(cuid()) @db.VarChar(255)
     pegawai_id           String          @db.VarChar(255)
-    // dari jabatan 
     gaji_pokok           Int             @default(0) @db.Integer
     tunjangan_tetap      Int             @default(0) @db.Integer
     tunjangan_kehadiran  Int             @default(0) @db.Integer

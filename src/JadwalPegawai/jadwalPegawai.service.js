@@ -13,15 +13,32 @@ export const GetAllJadwalPegawai = async (filter = {}) => {
 };
 
 export const GetAllJadwalPegawaiByBulanTahun = async (bulan, tahun) => {
-  const firstDay = new Date(tahun, bulan - 1, 1);
-  const lastDay = new Date(tahun, bulan, 0, 23, 59, 59);
+  const firstDay = new Date(tahun, bulan - 1, 2);
+  const lastDay = new Date(tahun, bulan, 1);
 
   const data = await getAllJadwalPegawai({ tanggal: { gte: firstDay, lte: lastDay } });
   return data;
 };
+
+export const GetAllJadwalPegawaiByTahun = async (tahun, pegawai_id) => {
+  // Get the first day of the year
+  const startDate = new Date(tahun, 0, 1);
+
+  // Get the last day of the year
+  const endDate = new Date(tahun, 11, 31, 23, 59, 59);
+
+  // Fetch data with proper parameters
+  const data = await getAllJadwalPegawai({
+    tanggal: { gte: startDate, lte: endDate },
+    pegawai_id: pegawai_id
+  });
+
+  return data;
+};
+
 export const GetAllJadwalPegawaiByPegawaiBulanTahun = async (bulan, tahun, id) => {
-  const firstDay = new Date(tahun, bulan - 1, 1);
-  const lastDay = new Date(tahun, bulan, 0, 23, 59, 59);
+  const firstDay = new Date(tahun, bulan - 1, 2);
+  const lastDay = new Date(tahun, bulan, 1);
   const data = await getAllJadwalPegawai({ tanggal: { gte: firstDay, lte: lastDay }, pegawai_id: id });
   return data;
 };
@@ -30,6 +47,7 @@ export const GetJadwalByTanggal = async (tanggal) => {
   const data = await getAllJadwalPegawai({ tanggal: tanggal + "T00:00:00.000Z" });
   return data;
 };
+
 export const GetJadwalByPegawaiTanggal = async (tanggal, id) => {
   const data = await getAllJadwalPegawai({ tanggal: tanggal + "T00:00:00.000Z", pegawai_id: id });
   return data;

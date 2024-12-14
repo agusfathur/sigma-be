@@ -198,7 +198,6 @@ export const VerifyToken = (req, res, next) => {
   const authHeader = req.headers["authorization"];
   // cek ada, jika ada ambil token, ambil variabel ke 2 karena token ada di index 1
   const token = authHeader && authHeader.split(" ")[1];
-
   // jika token null, maka unauthorized / tidak login
   if (token === null)
     return res.status(401).json({

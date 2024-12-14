@@ -56,7 +56,6 @@ router.get("/:id", async (req, res) => {
 // by user id
 router.get("/user/:id", async (req, res) => {
   const id = req.params.id;
-  console.log(id);
   try {
     const data = await GetPegawaiByUserId(id);
     if (!data) {
@@ -118,7 +117,6 @@ router.post("/", async (req, res) => {
       ...validatedFields.data,
       ...validatedImage.data
     };
-    console.log({ allData });
     const create = await CreatePegawai(allData);
     return res.status(201).json({
       status: true,

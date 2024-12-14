@@ -12,6 +12,13 @@ export const GetLiburById = async (id) => {
   return getData;
 };
 
+export const GetAllLiburByBulanTahun = async (bulan, tahun) => {
+  const firstDay = new Date(tahun, bulan - 1, 1);
+  const lastDay = new Date(tahun, bulan, 0, 23, 59, 59);
+  const data = await getAllLibur({ tanggal: { gte: firstDay, lte: lastDay } });
+  return data;
+};
+
 export const CreateLibur = async (data) => {
   // Buat Absensi agar ketika status hadir, maka buat
   try {

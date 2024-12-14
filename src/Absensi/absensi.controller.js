@@ -112,6 +112,7 @@ router.post("/masuk", async (req, res) => {
       data: create.data
     });
   } catch (error) {
+    console.log(error);
     return res.status(500).json({
       status: false,
       statusCode: 500,
@@ -233,7 +234,6 @@ router.get("/pegawai/:id", async (req, res) => {
   try {
     if (query.tanggal) {
       const tanggal = query.tanggal;
-
       getAll = await GetAbsensiByTanggalPegawai(tanggal, pegawaiId);
     } else if (query.bulan && query.tahun) {
       const bulan = query.bulan;

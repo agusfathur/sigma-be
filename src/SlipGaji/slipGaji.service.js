@@ -101,7 +101,14 @@ export const CreateManySlipGaji = async (bulan, tahun) => {
       data: {}
     };
   }
-  const now = new Date(new Date().toLocaleDateString("id-ID").split("/").reverse().join("-") + "T00:00:00.000Z");
+  const now = new Date(
+    new Date()
+      .toLocaleDateString("id-ID")
+      .split("/")
+      .map((part) => part.padStart(2, "0"))
+      .reverse()
+      .join("-") + "T00:00:00.000Z"
+  );
   const allPegawai = await GetAllPegawaiByStatus("aktif");
   const settingGaji = await GetSettingGaji();
   let tunjanganKehadiran;
@@ -368,7 +375,14 @@ export const UpdateManySlipGaji = async (bulan, tahun) => {
       data: []
     };
   }
-  const now = new Date(new Date().toLocaleDateString("id-ID").split("/").reverse().join("-") + "T00:00:00.000Z");
+  const now = new Date(
+    new Date()
+      .toLocaleDateString("id-ID")
+      .split("/")
+      .map((part) => part.padStart(2, "0"))
+      .reverse()
+      .join("-") + "T00:00:00.000Z"
+  );
   const settingGaji = await GetSettingGaji();
   const slipGajiPegawai = [];
   for await (const slipGaji of getSlipGaji) {

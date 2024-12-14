@@ -5,6 +5,8 @@ import {
   DeletePinjamanById,
   GetAllPinjaman,
   GetAllPinjamanByPegawai,
+  GetAllPinjamanByPegawaiBulanTahun,
+  GetAllPinjamanByPegawaiTanggal,
   GetPinjamanByBulanTahun,
   GetPinjamanById,
   GetPinjamanBytanggal,
@@ -72,16 +74,17 @@ router.get("/:id", async (req, res) => {
 
 router.get("/pegawai/:id", async (req, res) => {
   const pegawaiId = req.params.id;
+  const query = req.query;
+  let pinjaman;
   try {
-    const pinjaman = await GetAllPinjamanByPegawai(pegawaiId);
-    if (pinjaman.length === 0) {
-      return res.status(404).json({
-        status: false,
-        statusCode: 404,
-        message: "Pinjaman By Pegawai not found",
-        data: {}
-      });
+    if (query.bulan && query.tahun) {
+      pinjaman = await GetAllPinjamanByPegawaiBulanTahun(pegawaiId, query.bulan, query.tahun);
+    } else if (query.tanggal) {
+      pinjaman = await GetAllPinjamanByPegawaiTanggal(pegawaiId, query.tanggal);
+    } else {
+      pinjaman = await GetAllPinjamanByPegawai(pegawaiId);
     }
+
     return res.status(200).json({
       status: true,
       statusCode: 200,

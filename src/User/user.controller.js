@@ -7,7 +7,8 @@ import {
   GetAllUser,
   GetAllUserByRole,
   GetUserById,
-  UpdateUserById
+  UpdateUserById,
+  UpdateUserPassword
 } from "./user.service.js";
 import { UserCreateSchema, UserUpdateSchema } from "./user.validation.js";
 import { validateImage } from "../utils/cloudinary.js";
@@ -211,16 +212,7 @@ router.post("/change-password/:id", async (req, res) => {
         data: {}
       });
     }
-    const validatedFields = await UserUpdateSchema.safeParseAsync(data);
-    if (!validatedFields.success) {
-      return res.status(400).json({
-        status: false,
-        statusCode: 400,
-        message: validatedFields.error.flatten().fieldErrors,
-        data: {}
-      });
-    }
-    const update = await UpdateUserById(userId, validatedFields.data);
+    const update = await UpdateUserPassword(userId, data.password);
     return res.status(200).json({
       status: true,
       statusCode: 200,

@@ -74,7 +74,7 @@ export const CreatePegawai = async (data) => {
       pegawaiData.foto = createdUser.image;
 
       // Mengonversi array menjadi string tanpa tanda kurung siku dan tanpa tanda kutip di sekitar setiap elemen
-      console.log(jabatan_fungsional_id);
+      // console.log(jabatan_fungsional_id);
       const createdPegawai = await insertPegawai(pegawaiData, prisma);
       let pegawaiJabatanFungsional;
       if (jabatan_fungsional_id && jabatan_fungsional_id.length > 0 && createdPegawai.id_pegawai !== null) {
@@ -84,7 +84,7 @@ export const CreatePegawai = async (data) => {
             jabatan_fungsional_id: id
           }))
         });
-        console.log(pegawaiJabatanFungsional);
+        // console.log(pegawaiJabatanFungsional);
       }
       if (createdPegawai.id_pegawai === null) {
         if (createdUser.id_user !== null) {

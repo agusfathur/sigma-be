@@ -242,15 +242,6 @@ router.delete("/:id", async (req, res) => {
   const id = req.params.id;
 
   try {
-    const getOne = await GetTunjanganTetapPegawaiById(id);
-    if (getOne.length === 0) {
-      return res.status(404).json({
-        status: false,
-        statusCode: 404,
-        message: "Tunjangan Tetap Pegawai not found",
-        data: {}
-      });
-    }
     const destroy = await DeleteTunjanganTetapPegawai(id);
 
     return res.status(200).json({

@@ -1,13 +1,26 @@
 // @ts-nocheck
 import express from "express";
-import { CreateLibur, DeleteLibur, GetAllLibur, GetLiburById, UpdateLibur } from "./libur.service.js";
+import {
+  CreateLibur,
+  DeleteLibur,
+  GetAllLibur,
+  GetAllLiburByBulanTahun,
+  GetLiburById,
+  UpdateLibur
+} from "./libur.service.js";
 import { LiburCreateSchema, LiburUpdateSchema } from "./libur.validation.js";
 
 const router = express.Router();
 
 router.get("/", async (req, res) => {
+  let getAll;
+
+  const query = req.query;
   try {
-    const getAll = await GetAllLibur();
+    if (query.tahun && query.bulan) {
+      getAll = await GetAllLiburByBulanTahun(query.bulan, query.tahun);
+    }
+    getAll = await GetAllLibur();
 
     return res.status(200).json({
       status: true,

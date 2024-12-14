@@ -21,6 +21,7 @@
 </head>
 
 <body>
+    <h2>Waktu : <span id="waktu"></span></h2>
     <h1>Lokasi Saya</h1>
     <div id="map">
         <iframe id="googleMap"
@@ -37,6 +38,13 @@
     </div>
 
     <script>
+        const waktu = new Date();
+        const jam = waktu.getHours();
+        const menit = waktu.getMinutes();
+        const detik = waktu.getSeconds();
+        console.log(waktu);
+
+        document.getElementById("waktu").textContent = `${jam}:${menit}:${detik}`;
         document.getElementById('getLocationButton').addEventListener('click', function () {
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(showPosition, showError);

@@ -32,6 +32,22 @@ export const GetPermohonanIzinByTanggal = async (tanggal, pegawai_id) => {
   return await getAllPermohonanIzin({ tanggal_dari: tanggal + "T00:00:00.000Z", pegawai_id: pegawai_id });
 };
 
+export const GetPermohonanIzinByTahun = async (tahun, pegawai_id) => {
+  // Get the first day of the year
+  const startDate = new Date(tahun, 0, 1);
+
+  // Get the last day of the year
+  const endDate = new Date(tahun, 11, 31, 23, 59, 59);
+
+  // Fetch data with proper parameters
+  const data = await getAllPermohonanIzin({
+    tanggal_dari: { gte: startDate, lte: endDate },
+    pegawai_id: pegawai_id
+  });
+
+  return data;
+};
+
 export const GetIzinByBulanTahunByPegawai = async (bulan, tahun, id) => {
   // Get first day of month
   const firstDay = new Date(tahun, bulan - 1, 1);

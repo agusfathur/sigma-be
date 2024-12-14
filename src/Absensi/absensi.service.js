@@ -137,8 +137,14 @@ export const CreateAbsensiMasuk = async (data) => {
       data: {}
     };
   }
-  const now = new Date(new Date().toLocaleDateString("id-ID").split("/").reverse().join("-") + "T00:00:00.000Z");
-  console.log(now);
+  const now = new Date(
+    new Date()
+      .toLocaleDateString("id-ID")
+      .split("/")
+      .map((part) => part.padStart(2, "0"))
+      .reverse()
+      .join("-") + "T00:00:00.000Z"
+  );
   const checkAbsensiHariIni = await getAllAbsensi({
     tanggal_absen: now,
     pegawai_id: data.pegawai_id
@@ -147,117 +153,111 @@ export const CreateAbsensiMasuk = async (data) => {
   if (checkAbsensiHariIni.length > 0) {
     return {
       status: false,
-      message: "Absensi already exists",
+      message: "Absensi sudah ada",
       data: {}
     };
   }
-  try {
-    const checkAbsensiHariIni = await getAllAbsensi({
-      tanggal_absen: new Date(),
-      pegawai_id: data.pegawai_id
-    });
 
-    if (checkAbsensiHariIni.length > 0) {
-      return {
-        status: false,
-        message: "Absensi already exists",
-        data: {}
-      };
-    }
+  // cek jangkauan kantor
+  // absensi berdasarkan koordinat
+  const dataPegawai = await getPegawaiById(data.pegawai_id);
 
-    // cek jangkauan kantor
-    // absensi berdasarkan koordinat
-    const dataPegawai = await getPegawaiById(data.pegawai_id);
+  const koordinatKantor = dataPegawai.data_lokasi.koordinat;
+  const luasKantor = dataPegawai.data_lokasi.luas_lokasi;
+  const [latitudeKantor, longitudeKantor] = koordinatKantor.split(",").map((coord) => coord.trim());
+  const [latitudePegawai, longitudePegawai] = data.koordinat_masuk.split(",").map((coord) => coord.trim());
 
-    const koordinatKantor = dataPegawai.data_lokasi.koordinat;
-    const luasKantor = dataPegawai.data_lokasi.luas_lokasi;
-    const [latitudeKantor, longitudeKantor] = koordinatKantor.split(",").map((coord) => coord.trim());
-    const [latitudePegawai, longitudePegawai] = data.koordinat_masuk.split(",").map((coord) => coord.trim());
+  const isInRange = isWithinRadius(latitudePegawai, longitudePegawai, latitudeKantor, longitudeKantor, luasKantor);
 
-    const isInRange = isWithinRadius(latitudePegawai, longitudePegawai, latitudeKantor, longitudeKantor, luasKantor);
-
-    if (!isInRange) {
-      return {
-        status: false,
-        statusCode: 400,
-        message: "Absensi Masuk diluar jangkauan kantor",
-        data: {}
-      };
-    }
-
-    // data form waktu masuk
-    const jamMasukPegawai = data.waktu_masuk;
-    // ambil dari db sesuai jadwal pegawai
-    const dataJadwal = await getJadwalPegawaiById(data.jadwal_id);
-    // ambil waktu kerja
-    const [hours, minutes] = dataJadwal.shift_kerja.waktu_masuk.split(":");
-    const [hoursPulang, minutesPulang] = dataJadwal.shift_kerja.waktu_pulang.split(":");
-
-    // cek jika masuk lebih awal 1 jam dari waktu kerja, tidak boleh absen
-    if (Number(jamMasukPegawai.split(":")[0]) < Number(hours - 1)) {
-      return {
-        status: false,
-        statusCode: 400,
-        message: "Absensi Masuk Belum Di Buka. Di Mulai Pukul " + Number(hours - 1) + ":" + minutes,
-        data: {}
-      };
-    } else if (Number(jamMasukPegawai.split(":")[0]) > Number(hoursPulang)) {
-      return {
-        status: false,
-        statusCode: 400,
-        message: "Absensi Masuk sudah diutup",
-        data: {}
-      };
-    }
-
-    const statusAbsen = {
-      hadir: "hadir",
-      izin: "izin",
-      cuti: "cuti",
-      sakit: "sakit",
-      terlambat: "terlambat",
-      tidakHadir: "tidak_hadir"
+  if (!isInRange) {
+    return {
+      status: false,
+      statusCode: 400,
+      message: "Absensi Masuk diluar jangkauan kantor",
+      data: {}
     };
+  }
 
-    let statusAbsenPegawai;
+  // data form waktu masuk
+  const jamMasukPegawai = data.waktu_masuk;
+  // ambil dari db sesuai jadwal pegawai
+  const dataJadwal = await getJadwalPegawaiById(data.jadwal_id);
+  // ambil waktu kerja
+  const [hours, minutes] = dataJadwal.shift_kerja.waktu_masuk.split(":");
+  const [hoursPulang, minutesPulang] = dataJadwal.shift_kerja.waktu_pulang.split(":");
 
-    // ambil tanggal waktu masuk (WIB)
-    const combinatedWaktuKerja = new Date(
-      new Date(dataJadwal.tanggal).toLocaleDateString("id-ID").split("/").reverse().join("-") +
-        "T" +
-        hours +
-        ":" +
-        minutes +
-        ":00.000Z"
-    );
-    // waktu masuk dari form
-    const [hoursMasuk, minutesMasuk] = data.waktu_masuk.split(":");
-    const waktuMasukPegawai = new Date(
-      new Date().toLocaleDateString("id-ID").split("/").reverse().join("-") +
-        "T" +
-        hoursMasuk +
-        ":" +
-        minutesMasuk +
-        ":00.000Z"
-    );
+  // cek jika masuk lebih awal 1 jam dari waktu kerja, tidak boleh absen
+  if (Number(jamMasukPegawai.split(":")[0]) < Number(hours - 1)) {
+    return {
+      status: false,
+      statusCode: 400,
+      message: "Absensi Masuk Belum Di Buka. Di Mulai Pukul " + Number(hours - 1) + ":" + minutes,
+      data: {}
+    };
+  } else if (Number(jamMasukPegawai.split(":")[0]) > Number(hoursPulang)) {
+    return {
+      status: false,
+      statusCode: 400,
+      message: "Absensi Masuk sudah diutup",
+      data: {}
+    };
+  }
 
-    if (
-      new Date(waktuMasukPegawai).toLocaleDateString("Id-ID") !==
-      new Date(combinatedWaktuKerja).toLocaleDateString("Id-ID")
-    ) {
-      return {
-        status: false,
-        statusCode: 400,
-        message: "Absensi Sudah Berakhir",
-        data: {}
-      };
-    }
-    if (waktuMasukPegawai > combinatedWaktuKerja) {
-      statusAbsenPegawai = statusAbsen.terlambat;
-    } else {
-      statusAbsenPegawai = statusAbsen.hadir;
-    }
+  const statusAbsen = {
+    hadir: "hadir",
+    izin: "izin",
+    cuti: "cuti",
+    sakit: "sakit",
+    terlambat: "terlambat",
+    tidakHadir: "tidak_hadir"
+  };
 
+  let statusAbsenPegawai;
+
+  // ambil tanggal waktu masuk (WIB)
+  const combinatedWaktuKerja = new Date(
+    new Date(dataJadwal.tanggal).toLocaleDateString("id-ID").split("/").reverse().join("-") +
+      "T" +
+      hours +
+      ":" +
+      minutes +
+      ":00.000Z"
+  );
+  // waktu masuk dari form
+  const [hoursMasuk, minutesMasuk] = data.waktu_masuk.split(":");
+  const waktuMasukPegawai = new Date(
+    new Date()
+      .toLocaleDateString("id-ID")
+      .split("/")
+      .map((part) => part.padStart(2, "0"))
+      .reverse()
+      .join("-") +
+      "T" +
+      hoursMasuk +
+      ":" +
+      minutesMasuk +
+      ":00.000Z"
+  );
+
+  if (
+    new Date(waktuMasukPegawai).toLocaleDateString("Id-ID") !==
+    new Date(combinatedWaktuKerja).toLocaleDateString("Id-ID")
+  ) {
+    console.log({ waktuMasukPegawai, combinatedWaktuKerja, tgl: dataJadwal.tanggal, jadwal: data.jadwal_id });
+    return {
+      status: false,
+      statusCode: 400,
+      message: "Absensi Sudah Berakhir",
+      data: {}
+    };
+  }
+  if (waktuMasukPegawai > combinatedWaktuKerja) {
+    statusAbsenPegawai = statusAbsen.terlambat;
+  } else {
+    statusAbsenPegawai = statusAbsen.hadir;
+  }
+
+  try {
     const create = await insertAbsensi({
       pegawai_id: data.pegawai_id,
       tanggal_absen: now,
@@ -299,7 +299,14 @@ export const CreateAbsensiPulang = async (data) => {
     };
   }
   try {
-    const now = new Date(new Date().toLocaleDateString("id-ID").split("/").reverse().join("-") + "T00:00:00.000Z");
+    const now = new Date(
+      new Date()
+        .toLocaleDateString("id-ID")
+        .split("/")
+        .map((part) => part.padStart(2, "0"))
+        .reverse()
+        .join("-") + "T00:00:00.000Z"
+    );
     const checkAbsensiHariIni = await getAllAbsensi({
       tanggal_absen: now,
       pegawai_id: data.pegawai_id

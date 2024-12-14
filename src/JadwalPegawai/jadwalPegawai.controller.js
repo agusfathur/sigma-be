@@ -7,6 +7,7 @@ import {
   GetAllJadwalPegawaiByBulanTahun,
   GetAllJadwalPegawaiByPegawai,
   GetAllJadwalPegawaiByPegawaiBulanTahun,
+  GetAllJadwalPegawaiByTahun,
   GetJadwalByPegawaiTanggal,
   GetJadwalByTanggal,
   GetJadwalPegawaiById,
@@ -82,10 +83,11 @@ router.get("/pegawai/:id", async (req, res) => {
       getByPegawai = await GetJadwalByPegawaiTanggal(query.tanggal, id);
     } else if (query.bulan && query.tahun) {
       getByPegawai = await GetAllJadwalPegawaiByPegawaiBulanTahun(query.bulan, query.tahun, id);
+    } else if (query.tahun) {
+      getByPegawai = await GetAllJadwalPegawaiByTahun(query.tahun, id);
     } else {
       getByPegawai = await GetAllJadwalPegawaiByPegawai(id);
     }
-    console.log(getByPegawai);
     return res.status(200).json({
       status: true,
       statusCode: 200,
