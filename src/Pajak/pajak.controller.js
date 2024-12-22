@@ -109,7 +109,6 @@ router.put("/:id", async (req, res) => {
       });
     }
     validatedFields.data.persen = Number(validatedFields.data.persen);
-    console.log(validatedFields.data);
     const update = await UpdatePajak(id, validatedFields.data);
     return res.status(200).json({
       status: true,
@@ -118,7 +117,6 @@ router.put("/:id", async (req, res) => {
       data: update
     });
   } catch (error) {
-    console.log(error.message);
     return res.status(500).json({
       status: false,
       statusCode: 500,

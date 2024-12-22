@@ -23,9 +23,7 @@ export const GetPembayaranGajiBySlipGajiId = async (id) => {
 };
 
 export const CreatePembayaranGaji = async (data) => {
-  console.log("from creat gaji", { data });
   const insert = await insertPembayaranGaji(data);
-  console.log({ insert });
   await updateSlipGaji(insert.slip_gaji_id, {
     status_pembayaran: "dibayar"
   });

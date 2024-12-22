@@ -19,8 +19,11 @@ router.get("/", async (req, res) => {
   try {
     if (query.tahun && query.bulan) {
       getAll = await GetAllLiburByBulanTahun(query.bulan, query.tahun);
+    } else if (query.tahun) {
+      getAll = await GetLiburByTahun(query.tahun);
+    } else {
+      getAll = await GetAllLibur();
     }
-    getAll = await GetAllLibur();
 
     return res.status(200).json({
       status: true,

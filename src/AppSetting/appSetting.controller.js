@@ -2,6 +2,7 @@
 import express from "express";
 import { GetAppSetting, UpdateAppSetting } from "./appSetting.service.js";
 import { validateImage } from "../utils/cloudinary.js";
+import { VerifyToken } from "../Auth/auth.service.js";
 
 const router = express.Router();
 
@@ -24,7 +25,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-router.put("/:id", async (req, res) => {
+router.put("/:id", VerifyToken, async (req, res) => {
   const id = req.params.id;
   const data = req.body;
   try {

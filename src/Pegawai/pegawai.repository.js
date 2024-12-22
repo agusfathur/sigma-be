@@ -9,6 +9,7 @@ export const getAllPegawai = async (filter = {}) => {
           jabatanFungsional: true
         }
       },
+      status_kepegawaian: true,
       user: true,
       data_lokasi: true
     },
@@ -31,6 +32,7 @@ export const getPegawaiById = async (id) => {
           jabatanFungsional: true
         }
       },
+      status_kepegawaian: true,
       user: true,
       data_lokasi: true
     }

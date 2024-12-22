@@ -6,6 +6,7 @@ import {
   CreateAbsensiPulang,
   DeleteAbsensi,
   GetAbsensiById,
+  GetAbsensiByTahun,
   GetAbsensiByTanggal,
   GetAbsensiByTanggalPegawai,
   GetAllAbsensi,
@@ -239,8 +240,11 @@ router.get("/pegawai/:id", async (req, res) => {
       const bulan = query.bulan;
       const tahun = query.tahun;
       getAll = await GetAllAbsensiByBulanTahunByPegawai(bulan, tahun, pegawaiId);
+    } else if (query.tahun) {
+      const tahun = query.tahun;
+      getAll = await GetAbsensiByTahun(tahun, pegawaiId);
     } else {
-      getAll = await GetAllAbsensi();
+      getAll = await GetAllAbsensiByPegawai(pegawaiId);
     }
 
     return res.status(200).json({

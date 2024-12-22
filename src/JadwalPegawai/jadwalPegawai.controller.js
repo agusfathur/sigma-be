@@ -78,6 +78,7 @@ router.get("/pegawai/:id", async (req, res) => {
   const id = req.params.id;
   const query = req.query;
   let getByPegawai;
+
   try {
     if (query.tanggal) {
       getByPegawai = await GetJadwalByPegawaiTanggal(query.tanggal, id);
@@ -88,6 +89,7 @@ router.get("/pegawai/:id", async (req, res) => {
     } else {
       getByPegawai = await GetAllJadwalPegawaiByPegawai(id);
     }
+
     return res.status(200).json({
       status: true,
       statusCode: 200,

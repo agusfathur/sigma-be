@@ -222,7 +222,6 @@ export const CreateManySlipGaji = async (bulan, tahun) => {
     let totalTunjanganBonus = 0;
     if (settingGaji.tunjangan_bonus) {
       const bonus = await GetAllTunjanganBonusByBulanTahunPegawai(pge.id_pegawai, bulan, tahun);
-      console.log({ bonus, nama: pge.nama });
       if (bonus.length > 0) {
         for await (const bns of bonus) {
           totalTunjanganBonus += bns.nominal;
@@ -421,7 +420,6 @@ export const UpdateManySlipGaji = async (bulan, tahun) => {
       }
       // Mendapatkan detail tunjangan tetap berdasarkan pegawai, bulan, dan tahun
       const getTunjanganTetap = await GetTunjanganTetapPegawaiById(slipGaji.pegawai_id);
-      console.log({ getTunjanganTetap, getTJDetail });
       if (getTunjanganTetap.length > 0) {
         for await (const tjTetap of getTunjanganTetap) {
           const tjNominal = await getTunjanganTetapById(tjTetap.tunjangan_tetap_id);

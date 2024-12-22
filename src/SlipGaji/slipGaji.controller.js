@@ -118,7 +118,6 @@ router.post("/", async (req, res) => {
     }
 
     const insert = await CreateManySlipGaji(validatedFields.data.bulan, validatedFields.data.tahun);
-    console.log(insert);
     return res.status(201).json({
       status: true,
       statusCode: 201,

@@ -35,7 +35,7 @@ const router = express.Router();
 
 router.use("/api/auth", routesLogin);
 router.use("/api/user", VerifyToken, routesUser);
-router.use("/api/app-setting", VerifyToken, routesAppSetting);
+router.use("/api/app-setting", routesAppSetting);
 router.use("/api/libur", VerifyToken, routesLibur);
 router.use("/api/kategori-libur", VerifyToken, routesKategoriLibur);
 router.use("/api/jenis-izin", VerifyToken, routesJenisIzin);

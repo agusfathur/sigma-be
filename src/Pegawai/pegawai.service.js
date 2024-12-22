@@ -112,7 +112,7 @@ export const UpdatePegawai = async (id, data) => {
   try {
     const result = await prisma.$transaction(async (prisma) => {
       const { pegawaiId, jabatan_fungsional_id, ...pegawaiData } = data.dataPegawai;
-      console.log(jabatan_fungsional_id);
+      // console.log(jabatan_fungsional_id);
 
       const updatedPegawai = await updatePegawaiById(id, pegawaiData, prisma);
       let userData;
@@ -188,9 +188,9 @@ export const UpdatePegawai = async (id, data) => {
       }
 
       // Debug log
-      console.log("Existing Jabatan:", existingJabatan);
-      console.log("Input Jabatan:", jabatan_fungsional_id);
-      console.log("Created Jabatan:", pegawaiJabatanFungsional);
+      // console.log("Existing Jabatan:", existingJabatan);
+      // console.log("Input Jabatan:", jabatan_fungsional_id);
+      // console.log("Created Jabatan:", pegawaiJabatanFungsional);
       return { updatedPegawai, updatedUser, pegawaiJabatanFungsional };
     });
 
@@ -227,7 +227,6 @@ export const UpdatePegawai = async (id, data) => {
 
 export const DeletePegawai = async (id) => {
   const getPegawai = await GetPegawaiById(id);
-  console.log(getPegawai);
   try {
     const result = await prisma.$transaction(async (prisma) => {
       let deletedJabatanFungsional;
@@ -251,7 +250,6 @@ export const DeletePegawai = async (id) => {
 
     const publidImageId = GetPublicId(getPegawai.foto);
     deleteImage = await DeleteImage(publidImageId);
-    console.log(deleteImage);
 
     return { result: "ok" };
   } catch (error) {

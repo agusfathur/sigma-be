@@ -92,7 +92,6 @@ router.post("/", async (req, res) => {
         data: {}
       });
     }
-    console.log(validatedFields.data);
     const create = await CreatePembayaranGaji(validatedFields.data);
     return res.status(201).json({
       status: true,
@@ -101,7 +100,6 @@ router.post("/", async (req, res) => {
       data: create
     });
   } catch (error) {
-    console.log(error.message);
     return res.status(500).json({
       status: false,
       statusCode: 500,

@@ -32,6 +32,22 @@ export const GetPermohonanIzinByTanggal = async (tanggal, pegawai_id) => {
   return await getAllPermohonanIzin({ tanggal_dari: tanggal + "T00:00:00.000Z", pegawai_id: pegawai_id });
 };
 
+export const GetPegawaiSedangIzin = async (tanggal) => {
+  const targetTanggal = new Date(`${tanggal}T00:00:00.000Z`);
+
+  // Query untuk mencari izin yang meliputi tanggal target
+  const semuaPermohonan = await getAllPermohonanIzin({
+    tanggal_dari: {
+      lte: targetTanggal // tanggal_dari harus kurang atau sama dengan tanggal target
+    },
+    tanggal_sampai: {
+      gte: targetTanggal // tanggal_sampai harus lebih atau sama dengan tanggal target
+    },
+    status: "diterima"
+  });
+  return semuaPermohonan;
+};
+
 export const GetPermohonanIzinByTahun = async (tahun, pegawai_id) => {
   // Get the first day of the year
   const startDate = new Date(tahun, 0, 1);
@@ -121,13 +137,11 @@ export const UpdateStatusPermohonanIzin = async (id, status) => {
     }
   } else if (getMohonIzin.status === "diterima" && status === "ditolak") {
     const pegawai = getMohonIzin.pegawai;
-    console.log("tolak");
 
     const dates = getDatesBetween(getMohonIzin.tanggal_dari, getMohonIzin.tanggal_sampai);
     for await (const tanggal of dates) {
       const getAbsensi = await GetAbsensiByTanggalPegawai(tanggal, pegawai.id_pegawai);
       const destroyAbsen = await DeleteAbsensi(getAbsensi[0].id_absen);
-      console.log(destroyAbsen);
     }
   }
 

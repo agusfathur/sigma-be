@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Page</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-black text-white">
+    <div class="min-h-screen flex">
+        <!-- Kiri: Grid Gambar dengan posisi tidak rata -->
+        <div class="w-3/5 grid grid-cols-2 gap-2 p-4 relative">
+            <img src="https://source.unsplash.com/random/300x200?nature" alt="Image 1" class="rounded-lg mt-8">
+            <img src="https://via.placeholder.com/300x200" alt="Image 2" class="rounded-lg -mt-8">
+            <img src="https://via.placeholder.com/300x200" alt="Image 3" class="rounded-lg">
+            <img src="https://via.placeholder.com/300x200" alt="Image 4" class="rounded-lg -mb-8">
+            <img src="https://via.placeholder.com/300x200" alt="Image 5" class="rounded-lg mt-6">
+            <img src="https://via.placeholder.com/300x800" alt="Image 6" class="rounded-lg -mt-6">
+        </div>
+
+        <!-- Kanan: Form Login -->
+        <div class="w-2/5 bg-black flex items-center justify-center p-10">
+            <div class="w-full max-w-md">
+                <!-- Logo -->
+                <div class="flex items-center mb-8">
+                    <img src="https://via.placeholder.com/40" alt="Logo" class="mr-2">
+                    <h1 class="text-3xl font-bold">MoontoN</h1>
+                </div>
+                <!-- Judul -->
+                <h2 class="text-2xl font-semibold mb-4">Welcome Back</h2>
+                <p class="text-gray-400 mb-6">Explore our new movies and get the better insight for your life</p>
+                <!-- Form -->
+                <form>
+                    <div class="space-y-4">
+                        <input type="email" placeholder="Email Address"
+                            class="w-full px-4 py-2 bg-gray-800 rounded-lg focus:outline-none">
+                        <input type="password" placeholder="Password"
+                            class="w-full px-4 py-2 bg-gray-800 rounded-lg focus:outline-none">
+                        <button type="submit"
+                            class="w-full bg-orange-500 text-white py-2 rounded-lg font-semibold hover:bg-orange-600">
+                            Start Watching
+                        </button>
+                    </div>
+                    <div class="mt-6 text-center">
+                        <button type="button"
+                            class="w-full border border-gray-500 text-gray-400 py-2 rounded-lg hover:bg-gray-700 hover:text-white">
+                            Create New Account
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

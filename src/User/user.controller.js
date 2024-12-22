@@ -48,7 +48,7 @@ router.get("/:id", async (req, res) => {
   try {
     const getOneUser = await GetUserById(userId);
 
-    if (getOneUser.length === 0) {
+    if (!getOneUser) {
       return res.status(400).json({
         status: false,
         statusCode: 400,
@@ -112,11 +112,10 @@ router.post("/", async (req, res) => {
 router.put("/:id", async (req, res) => {
   const userId = req.params.id;
   const data = req.body;
-
   try {
     const getOneUser = await GetUserById(userId);
 
-    if (getOneUser.length === 0) {
+    if (!getOneUser) {
       return res.status(404).json({
         status: false,
         statusCode: 404,
@@ -139,7 +138,6 @@ router.put("/:id", async (req, res) => {
       };
     }
 
-    console.log(validatedFields.data);
     if (!validatedFields.success || !validatedImage.status) {
       return res.status(400).json({
         status: false,

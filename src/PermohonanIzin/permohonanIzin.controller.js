@@ -10,7 +10,8 @@ import {
   UpdateStatusPermohonanIzin,
   GetIzinByBulanTahunByPegawai,
   GetPermohonanIzinByTanggal,
-  GetPermohonanIzinByTahun
+  GetPermohonanIzinByTahun,
+  GetPegawaiSedangIzin
 } from "./permohonanIzin.service.js";
 import { PermohonanIzinCreateSchema, PermohonanIzinUpdateSchema } from "./permohonanIzin.validartion.js";
 import { ValidateFileIzin } from "../utils/cloudinary.js";
@@ -18,8 +19,16 @@ import { ValidateFileIzin } from "../utils/cloudinary.js";
 const router = express.Router();
 
 router.get("/", async (req, res) => {
+  const query = req.query;
+  let permohonanIzin;
   try {
-    const permohonanIzin = await GetAllPermohonanIzin();
+    if (query.bulan && query.tahun) {
+      permohonanIzin = await GetIzinByBulanTahunByPegawai(query.bulan, query.tahun);
+    } else if (query.tanggal) {
+      permohonanIzin = await GetPegawaiSedangIzin(query.tanggal);
+    } else {
+      permohonanIzin = await GetAllPermohonanIzin();
+    }
     return res.status(200).json({
       status: true,
       statusCode: 200,
@@ -115,7 +124,6 @@ router.post("/", async (req, res) => {
     dataCreate.bukti = validatedFile.data.path;
 
     const create = await CreatePermohonanIzin(dataCreate);
-    console.log(create);
 
     return res.status(200).json({
       status: true,

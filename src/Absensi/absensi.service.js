@@ -124,6 +124,22 @@ export const GetAllAbsensiByBulanTahunPegawai = async (pegawai_id, bulan, tahun)
   return data;
 };
 
+export const GetAbsensiByTahun = async (tahun, pegawai_id) => {
+  // Get the first day of the year
+  const startDate = new Date(tahun, 0, 1);
+
+  // Get the last day of the year
+  const endDate = new Date(tahun, 11, 31, 23, 59, 59);
+
+  // Fetch data with proper parameters
+  const data = await getAllAbsensi({
+    tanggal_absen: { gte: startDate, lte: endDate },
+    pegawai_id: pegawai_id
+  });
+
+  return data;
+};
+
 export const CreateAbsensi = async (data) => {
   const create = await insertAbsensi(data);
   return create;

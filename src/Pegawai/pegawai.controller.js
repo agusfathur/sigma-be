@@ -4,6 +4,7 @@ import {
   CreatePegawai,
   DeletePegawai,
   GetAllPegawai,
+  GetAllPegawaiByStatus,
   GetPegawaiById,
   GetPegawaiByUserId,
   UpdatePegawai
@@ -15,8 +16,15 @@ import { UserCreateSchema, UserUpdateSchema } from "../User/user.validation.js";
 const router = express.Router();
 
 router.get("/", async (req, res) => {
+  let getAll;
+  const status = req.query.status;
   try {
-    const getAll = await GetAllPegawai();
+    if (status) {
+      getAll = await GetAllPegawaiByStatus(status);
+    } else {
+      getAll = await GetAllPegawai();
+    }
+
     return res.status(200).json({
       status: true,
       statusCode: 200,
@@ -95,11 +103,11 @@ router.post("/", async (req, res) => {
 
   const validatedFields = await PegawaiCreateSchema.safeParseAsync(data);
   if (!validatedFieldsForUser.success || !validatedFields.success || !validatedImage.status) {
-    console.log({
-      ...validatedFieldsForUser?.error?.flatten()?.fieldErrors,
-      ...validatedFields?.error?.flatten()?.fieldErrors,
-      ...validatedImage?.messag
-    });
+    // console.log({
+    //   ...validatedFieldsForUser?.error?.flatten()?.fieldErrors,
+    //   ...validatedFields?.error?.flatten()?.fieldErrors,
+    //   ...validatedImage?.messag
+    // });
     return res.status(400).json({
       status: false,
       statusCode: 400,
