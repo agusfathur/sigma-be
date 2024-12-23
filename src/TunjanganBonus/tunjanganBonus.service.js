@@ -31,6 +31,15 @@ export const GetAllTunjanganBonusByBulanTahunPegawai = async (pegawai_id, bulan,
 
   return data;
 };
+export const GetAllTunjanganBonusByBulanTahun = async (pegawai_id, bulan, tahun) => {
+  const firstDay = new Date(tahun, bulan - 1, 1);
+  const lastDay = new Date(tahun, bulan, 0, 23, 59, 59);
+  const data = await getAllTunjanganBonus({
+    tanggal: { gte: firstDay, lte: lastDay }
+  });
+
+  return data;
+};
 export const GetTunjanganBonusByTahun = async (tahun) => {
   const start = new Date(`${tahun}-01-01`);
   const end = new Date(`${tahun}-12-31`);

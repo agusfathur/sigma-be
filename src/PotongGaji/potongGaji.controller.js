@@ -4,6 +4,7 @@ import {
   CreatePotongGaji,
   DeletePotongGajiById,
   GetAllPotongGaji,
+  GetAllPotongGajiByBulanTahun,
   GetAllPotongGajiByPegawai,
   GetPotongGajiById,
   UpdatePotongGajiById
@@ -13,8 +14,14 @@ import { PotongGajiCreateSchema, PotongGajiUpdateSchema } from "./potongGaji.val
 const router = express.Router();
 
 router.get("/", async (req, res) => {
+  const query = req.query;
+  let potongGaji;
   try {
-    const potongGaji = await GetAllPotongGaji();
+    if (query.bulan && query.tahun) {
+      potongGaji = await GetAllPotongGajiByBulanTahun(query.bulan, query.tahun);
+    } else {
+      potongGaji = await GetAllPotongGaji();
+    }
     return res.status(200).json({
       status: true,
       statusCode: 200,

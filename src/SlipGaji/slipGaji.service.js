@@ -34,8 +34,7 @@ import {
 import {
   createSlipGajiDetailKehadiran,
   deleteSlipGajiDetailKehadiran,
-  getSlipGajiDetailKehadiranByPegawaiBulanTahun,
-  updateSlipGajiDetailKehadiran
+  getSlipGajiDetailKehadiranByPegawaiBulanTahun
 } from "../SlipGajiDetail/SGJ.kehadiran.controller.js";
 import {
   createSlipGajiDetailFungsional,
@@ -58,7 +57,6 @@ import {
   getSlipGajiDetailLemburByPegawaiBulanTahun
 } from "../SlipGajiDetail/SGJ.lembur.controller.js";
 import { getPegawaiById } from "../Pegawai/pegawai.repository.js";
-import { getTunjanganBonusByPegawaiId } from "../TunjanganBonus/tunjanganBonus.repository.js";
 import { GetTunjanganTetapPegawaiById } from "../TunjanganTetapPegawai/tunjanganTetapPegawai.service.js";
 
 export const GetAllSlipGaji = async () => {
@@ -91,6 +89,48 @@ export const GetAllSlipGajiByPegawai = async (id) => {
   return data;
 };
 
+export const GetRekapGajiByTahun = async (tahun) => {
+  const slipGaji = await getAllSlipGaji({ tahun });
+
+  // Group by month number
+  const rekapByBulan = slipGaji.reduce((acc, slip) => {
+    if (!acc[slip.bulan]) {
+      acc[slip.bulan] = {
+        bulan: slip.bulan,
+        totalGajiPokok: 0,
+        totalTunjangan: 0,
+        totalPotongan: 0,
+        totalPengeluaran: 0
+      };
+    }
+
+    // Sum up base salary
+    acc[slip.bulan].totalGajiPokok += slip.gaji_pokok;
+
+    // Sum up all allowances
+    const totalTunjangan =
+      slip.tunjangan_tetap +
+      slip.tunjangan_kehadiran +
+      slip.tunjangan_fungsional +
+      slip.tunjangan_bonus +
+      slip.tunjangan_lembur;
+    acc[slip.bulan].totalTunjangan += totalTunjangan;
+
+    // Sum up all deductions
+    const totalPotongan = slip.pajak + slip.pinjaman + slip.potong_gaji;
+    acc[slip.bulan].totalPotongan += totalPotongan;
+
+    // Calculate total expenditure
+    acc[slip.bulan].totalPengeluaran = acc[slip.bulan].totalGajiPokok + acc[slip.bulan].totalTunjangan;
+    acc[slip.bulan].tahun = slip.tahun;
+    return acc;
+  }, {});
+
+  // Convert to array and sort by month number
+  const rekapArray = Object.values(rekapByBulan).sort((a, b) => a.bulan - b.bulan);
+
+  return rekapArray;
+};
 export const CreateManySlipGaji = async (bulan, tahun) => {
   const checkSlipGaji = await getAllSlipGaji({ bulan, tahun });
   if (checkSlipGaji.length > 0) {

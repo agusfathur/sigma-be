@@ -4,6 +4,11 @@ export const getAllSlipGaji = async (filter = {}) => {
   return await prisma.slip_gaji.findMany({
     include: {
       pegawai: true,
+      pegawai: {
+        include: {
+          jabatan: true
+        }
+      },
       pembayaran_gaji: true,
       slip_gaji_detail_gaji_pokok: true,
       slip_gaji_detail_kehadiran: true,

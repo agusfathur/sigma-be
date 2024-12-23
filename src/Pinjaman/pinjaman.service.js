@@ -22,6 +22,13 @@ export const GetAllPinjamanByPegawaiTanggal = async (pegawaiId, tanggal) => {
   return data;
 };
 
+export const GetAllPinjamanByBulanTahunStatus = async (bulan, tahun, status) => {
+  const firstDay = new Date(tahun, bulan - 1, 1);
+  const lastDay = new Date(tahun, bulan, 0, 23, 59, 59);
+  const data = await getAllPinjaman({ status_pinjaman: status, tanggal: { gte: firstDay, lte: lastDay } });
+  return data;
+};
+
 export const GetAllPinjamanByPegawaiBulanTahun = async (pegawaiId, bulan, tahun) => {
   const firstDay = new Date(tahun, bulan - 1, 1);
   const lastDay = new Date(tahun, bulan, 0, 23, 59, 59);

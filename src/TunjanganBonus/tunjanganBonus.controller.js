@@ -4,6 +4,7 @@ import {
   CreateTunjanganBonus,
   DestroyTunjanganBonus,
   GetAllTunjanganBonus,
+  GetAllTunjanganBonusByBulanTahun,
   GetAllTunjanganBonusByCreatedAt,
   GetTunjanganBonusById,
   GetTunjanganBonusByPegawaiId,
@@ -18,7 +19,9 @@ router.get("/", async (req, res) => {
   let data;
   const query = req.query;
   try {
-    if (query.tahun) {
+    if (query.bulan && query.tahun) {
+      data = await GetAllTunjanganBonusByBulanTahun(query.bulan, query.tahun);
+    } else if (query.tahun) {
       data = await GetTunjanganBonusByTahun(query.tahun);
     } else {
       data = await GetAllTunjanganBonus();

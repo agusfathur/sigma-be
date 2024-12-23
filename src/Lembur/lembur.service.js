@@ -33,6 +33,10 @@ export const GetLemburPegawaiByPegawaiTanggal = async (id, tanggal) => {
   const data = await getAllLembur({ pegawai_id: id, tanggal: tanggal + "T00:00:00.000Z" });
   return data;
 };
+export const GetLemburByTanggalStatus = async (tanggal, status) => {
+  const data = await getAllLembur({ status_lembur: status, tanggal: tanggal + "T00:00:00.000Z" });
+  return data;
+};
 
 export const GetAllLemburByPegawaiAndStatus = async (id, status) => {
   const data = await getAllLembur({
@@ -52,6 +56,19 @@ export const GetAllLemburByBulanTahun = async (bulan, tahun) => {
       gte: firstDay,
       lte: lastDay
     }
+  });
+  return data;
+};
+
+export const GetAllLemburByStatus = async (bulan, tahun, status) => {
+  const firstDay = new Date(tahun, bulan - 1, 1);
+  const lastDay = new Date(tahun, bulan, 0, 23, 59, 59);
+  const data = await getAllLembur({
+    tanggal: {
+      gte: firstDay,
+      lte: lastDay
+    },
+    status_lembur: status
   });
   return data;
 };

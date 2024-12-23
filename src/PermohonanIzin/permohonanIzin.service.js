@@ -48,6 +48,16 @@ export const GetPegawaiSedangIzin = async (tanggal) => {
   return semuaPermohonan;
 };
 
+export const GetIzinByStatus = async (bulan, tahun, status) => {
+  const firstDay = new Date(tahun, bulan - 1, 1);
+
+  // Get last day of month (day 0 of next month = last day of current month)
+  const lastDay = new Date(tahun, bulan, 0, 23, 59, 59);
+
+  const data = await getAllPermohonanIzin({ tanggal_dari: { gte: firstDay, lte: lastDay }, status: status });
+  return data;
+};
+
 export const GetPermohonanIzinByTahun = async (tahun, pegawai_id) => {
   // Get the first day of the year
   const startDate = new Date(tahun, 0, 1);

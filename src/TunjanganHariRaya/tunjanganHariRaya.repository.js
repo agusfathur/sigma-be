@@ -3,7 +3,12 @@ import { prisma } from "../utils/prisma.js";
 export const getAllTHR = async (filter = {}) => {
   return await prisma.tunjangan_hari_raya.findMany({
     include: {
-      pegawai: true
+      pegawai: true,
+      pegawai: {
+        include: {
+          jabatan: true
+        }
+      }
     },
     orderBy: {
       tahun: "desc"

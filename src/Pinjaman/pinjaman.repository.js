@@ -3,7 +3,12 @@ import { prisma } from "../utils/prisma.js";
 export const getAllPinjaman = async (filter = {}) => {
   return await prisma.pinjaman.findMany({
     include: {
-      pegawai: true
+      pegawai: true,
+      pegawai: {
+        include: {
+          jabatan: true
+        }
+      }
     },
     orderBy: {
       createdAt: "desc"

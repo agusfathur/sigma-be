@@ -4,6 +4,7 @@ import {
   CreatePinjaman,
   DeletePinjamanById,
   GetAllPinjaman,
+  GetAllPinjamanByBulanTahunStatus,
   GetAllPinjamanByPegawai,
   GetAllPinjamanByPegawaiBulanTahun,
   GetAllPinjamanByPegawaiTanggal,
@@ -21,7 +22,9 @@ router.get("/", async (req, res) => {
   let pinjaman;
   const query = req.query;
   try {
-    if (query.bulan && query.tahun) {
+    if (query.bulan && query.tahun && query.status) {
+      pinjaman = GetAllPinjamanByBulanTahunStatus(query.bulan, query.tahun, query.status);
+    } else if (query.bulan && query.tahun) {
       pinjaman = await GetPinjamanByBulanTahun(query.bulan, query.tahun);
     } else if (query.tanggal) {
       pinjaman = await GetPinjamanBytanggal(query.tanggal);
@@ -77,7 +80,9 @@ router.get("/pegawai/:id", async (req, res) => {
   const query = req.query;
   let pinjaman;
   try {
-    if (query.bulan && query.tahun) {
+    if (query.bulan && query.tahun && query.status) {
+      pinjaman = await GetAllPinjamanByBulanTahunStatus(query.bulan, query.tahun, query.status);
+    } else if (query.bulan && query.tahun) {
       pinjaman = await GetAllPinjamanByPegawaiBulanTahun(pegawaiId, query.bulan, query.tahun);
     } else if (query.tanggal) {
       pinjaman = await GetAllPinjamanByPegawaiTanggal(pegawaiId, query.tanggal);

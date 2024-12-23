@@ -6,6 +6,11 @@ export const getAllLembur = async (filter = {}) => {
       absensi: {
         include: {
           pegawai: true,
+          pegawai: {
+            include: {
+              jabatan: true
+            }
+          },
           jadwal_pegawai: true
         }
       }

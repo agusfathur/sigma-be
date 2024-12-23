@@ -11,7 +11,8 @@ import {
   GetIzinByBulanTahunByPegawai,
   GetPermohonanIzinByTanggal,
   GetPermohonanIzinByTahun,
-  GetPegawaiSedangIzin
+  GetPegawaiSedangIzin,
+  GetIzinByStatus
 } from "./permohonanIzin.service.js";
 import { PermohonanIzinCreateSchema, PermohonanIzinUpdateSchema } from "./permohonanIzin.validartion.js";
 import { ValidateFileIzin } from "../utils/cloudinary.js";
@@ -22,7 +23,9 @@ router.get("/", async (req, res) => {
   const query = req.query;
   let permohonanIzin;
   try {
-    if (query.bulan && query.tahun) {
+    if (query.bulan && query.tahun && query.status) {
+      permohonanIzin = await GetIzinByStatus(query.bulan, query.tahun, query.status);
+    } else if (query.bulan && query.tahun) {
       permohonanIzin = await GetIzinByBulanTahunByPegawai(query.bulan, query.tahun);
     } else if (query.tanggal) {
       permohonanIzin = await GetPegawaiSedangIzin(query.tanggal);

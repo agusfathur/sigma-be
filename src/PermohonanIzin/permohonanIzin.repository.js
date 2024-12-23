@@ -4,6 +4,11 @@ export const getAllPermohonanIzin = async (filter = {}) => {
   return await prisma.permohonan_izin.findMany({
     include: {
       pegawai: true,
+      pegawai: {
+        include: {
+          jabatan: true
+        }
+      },
       jenis_izin: true
     },
     where: filter,

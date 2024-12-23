@@ -26,6 +26,14 @@ export const GetPotonGajiPegawaibyTahunBulan = async (pegawai_id, bulan, tahun) 
   });
   return data;
 };
+export const GetAllPotongGajiByBulanTahun = async (bulan, tahun) => {
+  const firstDay = new Date(tahun, bulan - 1, 1);
+  const lastDay = new Date(tahun, bulan, 0, 23, 59, 59);
+  const data = await getAllPotongGaji({
+    tanggal: { gte: firstDay, lte: lastDay }
+  });
+  return data;
+};
 
 export const GetPotongGajiById = async (id) => {
   const data = await getPotongGajiById(id);

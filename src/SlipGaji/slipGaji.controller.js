@@ -9,6 +9,7 @@ import {
   GetAllSlipGajiByBulanTahunPegawai,
   GetAllSlipGajiByPegawai,
   GetAllSlipGajiByTahunPegawai,
+  GetRekapGajiByTahun,
   GetSlipGajiById,
   UpdateManySlipGaji,
   UpdateSlipGaji
@@ -62,6 +63,27 @@ router.get("/:id", async (req, res) => {
       statusCode: 200,
       message: "Slip Gaji successfully retrieved",
       data: getOne
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      statusCode: 500,
+      message: error.message,
+      data: {}
+    });
+  }
+});
+
+router.get("/rekap/:tahun", async (req, res) => {
+  const tahun = req.params.tahun;
+  console.log(tahun);
+  try {
+    const getRekap = await GetRekapGajiByTahun(Number(tahun));
+    return res.status(200).json({
+      status: true,
+      statusCode: 200,
+      message: "Rekap Gaji successfully retrieved",
+      data: getRekap
     });
   } catch (error) {
     return res.status(500).json({

@@ -7,8 +7,10 @@ import {
   GetAllLembur,
   GetAllLemburByBulanTahun,
   GetAllLemburByPegawai,
+  GetAllLemburByStatus,
   GetAllLemburByTanggal,
   GetLemburById,
+  GetLemburByTanggalStatus,
   GetLemburPegawaiByPegawaiTanggal,
   GetLemburPegawaiByTanggal,
   UpdateLembur,
@@ -22,7 +24,11 @@ router.get("/", async (req, res) => {
   let getAll;
   const query = req.query;
   try {
-    if (query.tanggal) {
+    if (query.bulan && query.tahun && query.status) {
+      getAll = await GetAllLemburByStatus(query.bulan, query.tahun, query.status);
+    } else if (query.tanggal && query.status) {
+      getAll = await GetLemburByTanggalStatus(query.tanggal, query.status);
+    } else if (query.tanggal) {
       getAll = await GetAllLemburByTanggal(query.tanggal);
     } else if (query.bulan && query.tahun) {
       getAll = await GetAllLemburByBulanTahun(query.bulan, query.tahun);
